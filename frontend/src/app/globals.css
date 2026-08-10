@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  --brand-pink: #fc03a1;
+  --brand-pink-hot: #ff1493;
+  --brand-pink-soft: #ffe4f1;
+  --brand-pink-light: #fff0f6;
+  --brand-black: #111111;
+  --brand-dark: #1a1a1a;
+}
+
+@theme inline {
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-pink-hot: var(--brand-pink-hot);
+  --color-brand-pink-soft: var(--brand-pink-soft);
+  --color-brand-pink-light: var(--brand-pink-light);
+  --color-brand-black: var(--brand-black);
+  --color-brand-dark: var(--brand-dark);
+  --font-sans: var(--font-montserrat);
+  --font-display: var(--font-playfair);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #111111;
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+}
+
+.brush-underline {
+  height: 8px;
+  width: 140px;
+  margin-inline: auto;
+  background: linear-gradient(90deg, transparent, var(--brand-pink), transparent);
+  border-radius: 999px;
+  clip-path: polygon(0 40%, 8% 10%, 25% 55%, 40% 15%, 55% 60%, 70% 20%, 85% 50%, 100% 30%, 100% 70%, 0 70%);
+}
+
+.pink-swoosh {
+  background: linear-gradient(105deg, #ff2d95 0%, #e91e8c 45%, #ff5aad 100%);
+  border-radius: 999px;
+  filter: drop-shadow(0 8px 18px rgba(233, 30, 140, 0.35));
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding-block: 0.35rem;
+}
+
+.price-row::before {
+  content: "";
+  flex: 1;
+  border-bottom: 1px dotted #d4d4d4;
+  order: 2;
+  transform: translateY(-0.35rem);
+}
+
+.price-row .label {
+  order: 1;
+}
+
+.price-row .amount {
+  order: 3;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.glow-border {
+  border: 1px solid var(--brand-pink);
+  box-shadow: 0 0 12px rgba(233, 30, 140, 0.35);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease both;
+}
+
+.animate-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.animate-delay-2 {
+  animation-delay: 0.24s;
+}

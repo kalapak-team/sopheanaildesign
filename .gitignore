@@ -1,0 +1,11 @@
+# Sophea Naildesign
+/backend/vendor
+/backend/node_modules
+/backend/.env
+/backend/storage/*.key
+/backend/database/*.sqlite
+/frontend/node_modules
+/frontend/.next
+/frontend/.env*.local
+.DS_Store
+Thumbs.db
