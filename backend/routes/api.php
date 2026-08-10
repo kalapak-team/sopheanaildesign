@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SiteController;
+use App\Http\Controllers\Api\StatsController;
+use App\Http\Controllers\Api\MediaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/site', [SiteController::class, 'index']);
@@ -17,7 +19,10 @@ Route::post('/admin/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::post('/upload', [MediaController::class, 'store']);
 
     Route::get('/categories', [ServiceController::class, 'categories']);
     Route::post('/categories', [ServiceController::class, 'storeCategory']);
@@ -50,6 +55,8 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
     Route::get('/settings', [SettingController::class, 'index']);
     Route::put('/settings', [SettingController::class, 'update']);
+
+    Route::get('/stats', [StatsController::class, 'index']);
 
     Route::get('/messages', [ContactController::class, 'index']);
     Route::put('/messages/{contact}/read', [ContactController::class, 'markRead']);

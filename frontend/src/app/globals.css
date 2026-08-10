@@ -98,3 +98,183 @@ body {
 .animate-delay-2 {
   animation-delay: 0.24s;
 }
+
+/* Scroll reveal (slide-in on scroll) */
+.reveal {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-left {
+  transform: translate3d(-56px, 0, 0);
+}
+
+.reveal-right {
+  transform: translate3d(56px, 0, 0);
+}
+
+.reveal-up {
+  transform: translate3d(0, 36px, 0);
+}
+
+.reveal-pop {
+  transform: scale(0.72);
+  filter: blur(4px);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-up,
+  .reveal-pop {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* Hero: pop/emerge from inside (scale-up + fade) */
+@keyframes hero-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.68);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.hero-pop {
+  animation: hero-pop 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Nav: drop from top on first load */
+@keyframes nav-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-drop {
+  animation: nav-drop 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-delay-1 { animation-delay: 0.08s; }
+.hero-delay-2 { animation-delay: 0.22s; }
+.hero-delay-3 { animation-delay: 0.36s; }
+.hero-delay-4 { animation-delay: 0.5s; }
+.hero-delay-5 { animation-delay: 0.64s; }
+
+.nav-delay-1 { animation-delay: 0.05s; }
+.nav-delay-2 { animation-delay: 0.14s; }
+.nav-delay-3 { animation-delay: 0.23s; }
+.nav-delay-4 { animation-delay: 0.32s; }
+.nav-delay-5 { animation-delay: 0.41s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-pop,
+  .nav-drop {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* —— Admin Light / Dark theme —— */
+.admin-app {
+  color-scheme: light;
+  --admin-page-bg: #f7f5f6;
+  --admin-chart-grid: #ececec;
+  --admin-chart-label: #525252;
+  --admin-elevated: #ffffff;
+  --admin-overlay: rgba(21, 21, 21, 0.55);
+  background: var(--admin-page-bg);
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-app.dark {
+  color-scheme: dark;
+  --admin-page-bg: #0b0b0c;
+  --admin-chart-grid: #2a2a2e;
+  --admin-chart-label: #a1a1aa;
+  --admin-elevated: #161618;
+  --admin-overlay: rgba(0, 0, 0, 0.72);
+
+  /* Remap neutrals — keep --color-white pure so text-white stays readable */
+  --color-neutral-50: #1a1a1c;
+  --color-neutral-100: #222226;
+  --color-neutral-200: #2e2e33;
+  --color-neutral-300: #3f3f46;
+  --color-neutral-400: #8b8b96;
+  --color-neutral-500: #a1a1aa;
+  --color-neutral-600: #d4d4d8;
+  --color-neutral-700: #e4e4e7;
+  --color-neutral-800: #f4f4f5;
+  --color-neutral-900: #fafafa;
+  --color-neutral-950: #ffffff;
+
+  --brand-pink-light: #2a1522;
+  --brand-pink-soft: #3a1a2e;
+  --color-brand-pink-light: var(--brand-pink-light);
+  --color-brand-pink-soft: var(--brand-pink-soft);
+
+  --color-violet-50: #1f1830;
+  --color-amber-50: #2a2114;
+  --color-sky-50: #142230;
+  --color-violet-600: #c4b5fd;
+  --color-amber-600: #fbbf24;
+  --color-sky-600: #7dd3fc;
+}
+
+/* Surfaces that used bg-white become elevated dark panels */
+.admin-app.dark :where(.bg-white, .bg-white\/85, .bg-white\/90, .bg-white\/70) {
+  background-color: var(--admin-elevated) !important;
+}
+
+.admin-app.dark .to-white {
+  --tw-gradient-to: var(--admin-elevated) !important;
+}
+
+.admin-app.dark :where(.bg-white\/5) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.admin-app.dark :where(.bg-white\/10, .bg-white\/15, .bg-white\/25) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.admin-app.dark .admin-sidebar {
+  background: #0a0a0b;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-app.dark .admin-header {
+  background: color-mix(in srgb, var(--admin-elevated) 88%, transparent);
+  border-color: var(--color-neutral-200);
+}
+
+.admin-app.dark input,
+.admin-app.dark textarea,
+.admin-app.dark select {
+  color-scheme: dark;
+}

@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { HeroSlide } from "@/lib/api";
+import { mediaUrl } from "@/lib/media";
 
 /**
- * Literal reproduction of sopheanaildesign.webflow.io's slider stack:
- *  .section-3        -> bg #030203, flex column
- *  .slider-wrapper    -> 100vw wide, height 100vh, max-height 800px
- *  .slider-subwrapper -> 90% width, max-width 1150px, height 75% (letterboxed)
- *  .left-arrow/.right-arrow -> 70x70 circle, bg #333, 5px white border, ±35px outside the edge
- *  .slide-nav (w-round) -> round pagination dots, invert (white/translucent) style
+ * Desktop: arrows sit outside left/right of the image (Webflow layout).
+ * Mobile: image first, then arrows below, then pagination dots
+ * (matches sopheanaildesign.webflow.io mobile).
  */
 export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
@@ -28,32 +26,43 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
   if (!slides.length) return null;
 
+  const arrowBtn =
+    "flex h-[52px] w-[52px] items-center justify-center rounded-full border-[4px] border-white bg-[#333] text-white transition active:scale-95 min-[992px]:h-[70px] min-[992px]:w-[70px] min-[992px]:border-[5px]";
+
   return (
     <section className="flex flex-col items-center bg-[#030203] pb-[40px]">
-      <div className="relative flex h-[clamp(400px,100vh,800px)] w-screen mt-[20px] items-center justify-center">
-        <div className="relative h-[75%] w-[90%] max-w-[1150px]">
-          {slides.map((slide, i) => (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-700 ${
-                i === index ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <Image
-                src={slide.image_path}
-                alt={slide.title || "Sophea Naildesign"}
-                fill
-                priority={i === 0}
-                className="object-cover"
-                sizes="1150px"
-              />
-            </div>
-          ))}
+      <div className="relative mt-[20px] flex w-screen flex-col items-center min-[992px]:h-[clamp(400px,100vh,800px)] min-[992px]:justify-center">
+        {/* Image frame */}
+        <div className="relative aspect-[3/4] w-[90%] max-w-[1150px] min-[768px]:aspect-[4/5] min-[992px]:aspect-auto min-[992px]:h-[75%]">
+          {slides.map((slide, i) => {
+            const src = mediaUrl(slide.image_path);
+            return (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 transition-opacity duration-700 ${
+                  i === index ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <Image
+                  src={src}
+                  alt={slide.title || "Sophea Naildesign"}
+                  fill
+                  priority={i === 0}
+                  className="object-cover"
+                  sizes="(max-width:991px) 90vw, 1150px"
+                  unoptimized={
+                    src.includes("/storage/") || src.includes("r2.dev")
+                  }
+                />
+              </div>
+            );
+          })}
 
+          {/* Desktop-only side arrows */}
           <button
             type="button"
             onClick={prev}
-            className="absolute left-[-35px] top-1/2 flex h-[70px] w-[70px] -translate-y-1/2 items-center justify-center rounded-full border-[5px] border-white bg-[#333] text-white transition hover:-translate-x-0.5 hover:-translate-y-1/2"
+            className={`absolute left-[-35px] top-1/2 z-10 hidden -translate-y-1/2 hover:-translate-x-0.5 min-[992px]:flex ${arrowBtn}`}
             aria-label="Previous"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -61,14 +70,35 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           <button
             type="button"
             onClick={next}
-            className="absolute right-[-35px] top-1/2 flex h-[70px] w-[70px] -translate-y-1/2 items-center justify-center rounded-full border-[5px] border-white bg-[#333] text-white transition hover:translate-y-[-50%] hover:translate-x-0.5"
+            className={`absolute right-[-35px] top-1/2 z-10 hidden -translate-y-1/2 hover:translate-x-0.5 min-[992px]:flex ${arrowBtn}`}
             aria-label="Next"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
+        </div>
 
-          {/* .slide-nav.w-round.w-slider-nav-invert: round dots, sitting below the image (not overlapping it) */}
-          <div className="absolute inset-x-0 top-full z-10 mt-[14px] flex items-center justify-center gap-[6px]">
+        {/* Mobile: arrows under the image, then dots */}
+        <div className="mt-3 flex w-[90%] max-w-[1150px] flex-col items-center gap-6 min-[992px]:mt-[14px] min-[992px]:gap-[6px]">
+          <div className="flex w-full max-w-[320px] items-center justify-between min-[480px]:max-w-[380px] min-[992px]:hidden">
+            <button
+              type="button"
+              onClick={prev}
+              className={arrowBtn}
+              aria-label="Previous"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              className={arrowBtn}
+              aria-label="Next"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-center gap-[8px]">
             {slides.map((slide, i) => (
               <button
                 key={slide.id}
@@ -76,7 +106,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 onClick={() => setIndex(i)}
                 aria-label={`Slide ${i + 1}`}
                 className={`h-[9px] w-[9px] rounded-full transition-colors ${
-                  i === index ? "bg-[#222]" : "bg-[#2226]"
+                  i === index ? "bg-[#ddd]" : "bg-[#555]"
                 }`}
               />
             ))}

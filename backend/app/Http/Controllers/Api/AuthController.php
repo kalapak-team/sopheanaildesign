@@ -40,6 +40,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'avatar' => $user->avatar,
             ],
         ]);
     }
@@ -48,6 +49,38 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => $request->user(),
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'password' => ['nullable', 'string', 'min:6', 'confirmed'],
+            'avatar' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if (array_key_exists('name', $data)) {
+            $user->name = $data['name'];
+        }
+        if (array_key_exists('email', $data)) {
+            $user->email = $data['email'];
+        }
+        if (array_key_exists('avatar', $data)) {
+            $user->avatar = $data['avatar'];
+        }
+        if (! empty($data['password'])) {
+            $user->password = $data['password'];
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil aktualisiert',
+            'user' => $user->fresh(),
         ]);
     }
 

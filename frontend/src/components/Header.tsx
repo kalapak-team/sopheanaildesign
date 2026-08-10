@@ -26,13 +26,22 @@ type HeaderProps = {
   variant?: "hero" | "solid";
 };
 
-function NavLink({ href, label }: { href: string; label: string }) {
+function NavLink({
+  href,
+  label,
+  delayClass = "",
+}: {
+  href: string;
+  label: string;
+  delayClass?: string;
+}) {
   const [hover, setHover] = useState(false);
   return (
     <a
       href={href}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      className={`nav-drop ${delayClass}`}
       style={{
         color: "#fff",
         letterSpacing: "0.75px",
@@ -57,7 +66,13 @@ function NavLink({ href, label }: { href: string; label: string }) {
   );
 }
 
-function NavMenu({ links }: { links: { href: string; label: string }[] }) {
+function NavMenu({
+  links,
+  delayOffset = 0,
+}: {
+  links: { href: string; label: string }[];
+  delayOffset?: number;
+}) {
   return (
     <nav
       style={{
@@ -68,8 +83,13 @@ function NavMenu({ links }: { links: { href: string; label: string }[] }) {
         display: "flex",
       }}
     >
-      {links.map((link) => (
-        <NavLink key={link.label} href={link.href} label={link.label} />
+      {links.map((link, i) => (
+        <NavLink
+          key={link.label}
+          href={link.href}
+          label={link.label}
+          delayClass={`nav-delay-${delayOffset + i + 1}`}
+        />
       ))}
     </nav>
   );
@@ -124,13 +144,13 @@ export function Header({ variant = "hero" }: HeaderProps) {
             display: "flex",
           }}
         >
-          <NavMenu links={leftLinks} />
-          <NavMenu links={rightLinks} />
+          <NavMenu links={leftLinks} delayOffset={0} />
+          <NavMenu links={rightLinks} delayOffset={2} />
         </div>
       </div>
 
       {/* Mobile/tablet menu button (<992px) */}
-      <div className="absolute right-4 top-4 z-30 min-[992px]:hidden">
+      <div className="absolute right-4 top-4 z-30 nav-drop nav-delay-1 min-[992px]:hidden">
         <button
           type="button"
           className="p-2 text-white"
@@ -144,12 +164,12 @@ export function Header({ variant = "hero" }: HeaderProps) {
       {open && (
         <div className="absolute inset-x-0 top-16 z-30 bg-black/85 px-4 py-4 text-white min-[992px]:hidden">
           <div className="flex flex-col gap-4">
-            {allLinks.map((link) => (
+            {allLinks.map((link, i) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="text-sm font-semibold uppercase tracking-[0.75px]"
+                className={`nav-drop text-sm font-semibold uppercase tracking-[0.75px] nav-delay-${Math.min(i + 1, 5)}`}
                 style={{ fontFamily: "var(--font-poppins)" }}
               >
                 {link.label}

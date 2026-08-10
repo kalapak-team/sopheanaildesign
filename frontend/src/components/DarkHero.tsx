@@ -1,12 +1,15 @@
 import Image from "next/image";
 import { Phone } from "lucide-react";
 import { Header } from "./Header";
+import { settingImage } from "@/lib/media";
+import type { SiteSettings } from "@/lib/api";
 
 type DarkHeroProps = {
   tagline?: string;
   phone?: string;
   facebook?: string;
   instagram?: string;
+  settings?: SiteSettings;
 };
 
 /**
@@ -22,7 +25,9 @@ export function DarkHero({
   phone = "079 827 94 98",
   facebook = "https://www.facebook.com/SopheaNaildesign",
   instagram = "https://www.instagram.com/sophea_naildesign/",
+  settings,
 }: DarkHeroProps) {
+  const bg = settingImage(settings, "dark_hero_image", "/images/hero/dark-hero.jpg");
   return (
     <section
       id="home"
@@ -36,8 +41,7 @@ export function DarkHero({
           viewport while the page scrolls past it, instead of scrolling away
           with the hero section like a regular <img>.
         */
-        backgroundImage:
-          "radial-gradient(circle, transparent 0%, rgba(0,0,0,0.58) 73%, #000 100%), linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url(/images/hero/dark-hero.jpg)",
+        backgroundImage: `radial-gradient(circle, transparent 0%, rgba(0,0,0,0.58) 73%, #000 100%), linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url(${bg})`,
         backgroundPosition: "0 0, 0 0, 50% 100%",
         backgroundRepeat: "repeat, repeat, no-repeat",
         backgroundSize: "auto, auto, cover",
@@ -49,7 +53,7 @@ export function DarkHero({
       {/* .header-container: fills remaining height below the navbar, .header-title-container centers its content within that space */}
       <div className="relative z-10 flex w-full max-w-[1280px] flex-1 flex-col items-center justify-center px-3 pb-[50px] text-center min-[992px]:px-6">
         <p
-          className="pb-[25px] pl-[6px] uppercase text-white max-[479px]:leading-none min-[480px]:leading-[1.777]"
+          className="hero-pop hero-delay-1 pb-[25px] pl-[6px] uppercase text-white max-[479px]:leading-none min-[480px]:leading-[1.777]"
           style={{
             fontFamily: "var(--font-poppins)",
             fontWeight: 600,
@@ -61,7 +65,7 @@ export function DarkHero({
         </p>
 
         <h1
-          className="bg-clip-text text-transparent pb-[25px] text-[42px] leading-none min-[480px]:text-[66px] min-[480px]:leading-[0.75] min-[992px]:text-[96px]"
+          className="hero-pop hero-delay-2 bg-clip-text text-transparent pb-[25px] text-[42px] leading-none min-[480px]:text-[66px] min-[480px]:leading-[0.75] min-[992px]:text-[96px]"
           style={{
             fontFamily: "var(--font-poppins)",
             fontWeight: 700,
@@ -74,8 +78,7 @@ export function DarkHero({
           SOPHEA NAILDESIGN
         </h1>
 
-        {/* .divider-image: rendered at its natural 949px width (like the source <img width="949">), only shrinking below that on narrow viewports */}
-        <div className="w-full max-w-[949px] pb-[25px]">
+        <div className="hero-pop hero-delay-3 w-full max-w-[949px] pb-[8px]">
           <Image
             src="/images/brand/brush.svg"
             alt=""
@@ -86,7 +89,7 @@ export function DarkHero({
           />
         </div>
 
-        <div className="flex items-center justify-center">
+        <div className="hero-pop hero-delay-4 -mt-1 flex items-center justify-center">
           <a
             href={`tel:${phone.replace(/\s/g, "")}`}
             className="mr-5 flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border-2 border-white"
@@ -106,7 +109,7 @@ export function DarkHero({
           </a>
         </div>
 
-        <div className="mt-[40px] flex items-center justify-center">
+        <div className="hero-pop hero-delay-5 mt-[28px] flex items-center justify-center">
           <a
             href={facebook}
             target="_blank"

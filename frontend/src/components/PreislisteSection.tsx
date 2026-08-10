@@ -1,43 +1,54 @@
 import Image from "next/image";
+import type { SiteSettings } from "@/lib/api";
+import { settingImage } from "@/lib/media";
 
 /**
- * Literal reproduction of sopheanaildesign.webflow.io's `.preisliste-sec`:
- *  - background: radial-gradient vignette over a fixed nail-polish photo
- *  - a small pink brush-stroke divider (.image.pos-1, 390px wide) above the
- *    price-list graphic itself (which already contains the logo/social/price
- *    content baked in — no extra heading is rendered on the source site).
+ * `.preisliste-sec`: dark nail-polish photo band with a centered pink brush
+ * divider above the baked-in price-list graphic.
  */
-export function PreislisteSection() {
+export function PreislisteSection({ settings }: { settings?: SiteSettings }) {
+  const bg = settingImage(
+    settings,
+    "preisliste_bg_image",
+    "/images/backgrounds/nail-polish.jpg"
+  );
+  const list = settingImage(
+    settings,
+    "preisliste_image",
+    "/images/preise/preisliste.jpg"
+  );
+
   return (
     <section
       id="preise"
-      className="relative flex flex-col items-center overflow-hidden bg-black pb-[100px] pt-[90px] min-[992px]:pt-[140px]"
+      className="relative flex flex-col items-center overflow-hidden bg-black pb-[180px] min-[992px]:pb-[200px]"
       style={{
-        backgroundImage:
-          "radial-gradient(circle, transparent 0%, rgba(0,0,0,0.49) 73%, #000 100%), url(/images/backgrounds/nail-polish.jpg)",
-        backgroundPosition: "0 0, 50%",
-        backgroundSize: "auto, cover",
-        backgroundAttachment: "scroll, fixed",
+        backgroundImage: `radial-gradient(circle, transparent 0%, rgba(0,0,0,0.62) 73%, #000 100%), linear-gradient(rgba(0,0,0,0.52), rgba(0,0,0,0.52)), url(${bg})`,
+        backgroundPosition: "0 0, 0 0, 50%",
+        backgroundSize: "auto, auto, cover",
+        backgroundAttachment: "scroll, scroll, fixed",
       }}
     >
-      <Image
-        src="/images/brand/brush.svg"
-        alt=""
-        width={390}
-        height={22}
-        className="mb-[10px] h-auto w-[390px] max-w-[90%]"
-        unoptimized
-      />
-      {/* .image-3: full-bleed-ish, but with a deliberate side gap (~3% of viewport) instead of touching the edges */}
+      <div className="flex w-full flex-col items-center justify-center py-[80px] min-[992px]:py-[120px]">
+        <Image
+          src="/images/brand/brush.svg"
+          alt=""
+          width={390}
+          height={22}
+          className="h-auto w-[390px] max-w-[90%]"
+          unoptimized
+        />
+      </div>
       <div className="w-[94%] max-w-[1780px]">
         <Image
-          src="/images/preise/preisliste.jpg"
+          src={list}
           alt="Preisliste Sophea Naildesign"
           width={1900}
           height={2689}
           sizes="100vw"
           className="h-auto w-full"
           priority={false}
+          unoptimized={list.includes("/storage/")}
         />
       </div>
     </section>

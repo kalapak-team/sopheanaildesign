@@ -19,9 +19,14 @@ const links = [
   { href: "#kontakt", label: "Kontakt" },
 ];
 
-export function FixedNav() {
+export function FixedNav({
+  logoSrc = "/images/brand/logo-full.png",
+}: {
+  logoSrc?: string;
+}) {
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
+  const remote = logoSrc.includes("/storage/");
 
   useEffect(() => {
     const onScroll = () => {
@@ -45,11 +50,12 @@ export function FixedNav() {
         <div className="flex h-full w-full items-stretch justify-between">
           <a href="#home" className="mr-[150px] flex items-center">
             <Image
-              src="/images/brand/logo-full.png"
+              src={logoSrc}
               alt="Sophea Naildesign"
               width={211}
               height={50}
               className="h-[50px] w-auto"
+              unoptimized={remote}
             />
           </a>
           <nav className="flex h-full">
@@ -76,11 +82,12 @@ export function FixedNav() {
       >
         <a href="#home" className="flex items-center">
           <Image
-            src="/images/brand/logo-full.png"
+            src={logoSrc}
             alt="Sophea Naildesign"
             width={169}
             height={40}
             className="h-10 w-auto"
+            unoptimized={remote}
           />
         </a>
         <button

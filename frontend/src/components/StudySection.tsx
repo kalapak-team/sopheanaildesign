@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { SiteSettings } from "@/lib/api";
+import { settingImage } from "@/lib/media";
 
 /**
  * Literal reproduction of sopheanaildesign.webflow.io's `.nail-liste.specifications`
@@ -41,12 +42,18 @@ const benefits = [
 ];
 
 export function StudySection({ settings }: { settings: SiteSettings }) {
+  const studyImage = settingImage(
+    settings,
+    "study_image",
+    "/images/about/nails-study.jpg"
+  );
   return (
     <section
       className="relative py-[80px] text-white"
       style={{
         backgroundColor: "#1d1d1d",
         backgroundImage: "linear-gradient(#141414, transparent 10%)",
+        fontFamily: "var(--font-poppins), Poppins, sans-serif",
       }}
     >
       <div className="mx-auto w-[90%] max-w-[1280px]">
@@ -86,9 +93,8 @@ export function StudySection({ settings }: { settings: SiteSettings }) {
             {benefits.map((item, i) => (
               <div
                 key={i}
-                className={`grid grid-cols-1 gap-4 p-6 min-[768px]:grid-cols-[1fr_1.8fr] min-[768px]:p-8 ${
-                  i % 2 === 0 ? "bg-[#202020]" : "bg-transparent"
-                }`}
+                className={`grid grid-cols-1 gap-4 p-6 min-[768px]:grid-cols-[1fr_1.8fr] min-[768px]:p-8 ${i % 2 === 0 ? "bg-[#202020]" : "bg-transparent"
+                  }`}
               >
                 <h4 className="text-center text-2xl font-bold uppercase leading-[100%] text-white min-[768px]:text-[34px]">
                   {item.title}
@@ -102,11 +108,12 @@ export function StudySection({ settings }: { settings: SiteSettings }) {
 
           <div className="relative min-h-[240px] overflow-hidden rounded-xl border border-brand-pink min-[768px]:min-h-0">
             <Image
-              src="/images/about/nails-study.jpg"
+              src={studyImage}
               alt="Nail art"
               fill
               className="object-cover"
               sizes="(max-width:768px) 100vw, 33vw"
+              unoptimized={studyImage.includes("/storage/")}
             />
           </div>
         </div>

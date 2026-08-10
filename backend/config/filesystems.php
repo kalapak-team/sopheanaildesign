@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Media Disk (uploads: images, avatars, etc.)
+    |--------------------------------------------------------------------------
+    |
+    | Use "public" for local storage (storage/app/public) or "r2" for
+    | Cloudflare R2. Switch via MEDIA_DISK in .env.
+    |
+    */
+
+    'media' => env('MEDIA_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -58,6 +70,26 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+
+        /*
+        | Cloudflare R2 (S3-compatible). Create an R2 API token with Object
+        | Read & Write, then set R2_* in .env and MEDIA_DISK=r2.
+        | R2_URL should be your public bucket URL or custom domain
+        | (e.g. https://pub-xxxx.r2.dev or https://cdn.example.com).
+        */
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => env('R2_DEFAULT_REGION', 'auto'),
+            'bucket' => env('R2_BUCKET'),
+            'url' => env('R2_URL'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => env('R2_USE_PATH_STYLE_ENDPOINT', true),
+            'throw' => true,
+            'report' => false,
+            'visibility' => 'public',
         ],
 
     ],

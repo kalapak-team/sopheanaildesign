@@ -1,0 +1,12 @@
+# Deploy this service with Root Directory = backend
+# Add a Railway PostgreSQL plugin and link it to this service.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/up"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
