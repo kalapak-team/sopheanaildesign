@@ -1,5 +1,5 @@
 # Laravel API for Railway (PostgreSQL + optional Cloudflare R2)
-FROM php:8.3-cli-bookworm
+FROM php:8.4-cli-bookworm
 
 WORKDIR /var/www/html
 
@@ -34,6 +34,8 @@ RUN printf '%s\n' \
     > /usr/local/etc/php/conf.d/uploads.ini
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # App source (vendor installed in image for faster boot)
 COPY composer.json composer.lock ./
