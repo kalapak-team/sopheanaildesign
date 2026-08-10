@@ -16,9 +16,26 @@ if [ -n "$DB_URL" ]; then
       export DB_URL
       ;;
   esac
+  # Ensure SSL for Railway Postgres
+  case "$DB_URL" in
+    *sslmode=*) ;;
+    *)
+      case "$DB_URL" in
+        *\?*) DB_URL="${DB_URL}&sslmode=require" ;;
+        *) DB_URL="${DB_URL}?sslmode=require" ;;
+      esac
+      export DB_URL
+      ;;
+  esac
 fi
 
+export DB_SSLMODE="${DB_SSLMODE:-require}"
+
 echo "Boot: PORT=$PORT DB_CONNECTION=${DB_CONNECTION:-unset} has_DB_URL=$([ -n "$DB_URL" ] && echo yes || echo no)"
+
+if [ -z "$DB_URL" ] && [ -z "$DB_HOST" ]; then
+  echo "ERROR: No database configured. Link Railway Postgres and set DATABASE_URL (or DB_URL)." >&2
+fi
 
 mkdir -p \
   storage/framework/cache \
@@ -32,10 +49,8 @@ if [ "${MEDIA_DISK:-public}" = "public" ]; then
   php artisan storage:link --force 2>/dev/null || true
 fi
 
-# Fail DB connect attempts quickly (default TCP timeout can exceed healthcheck)
 export PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-5}"
 
-# Migrate with retries, but never block forever / never kill the container
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   i=0
   migrated=0
@@ -49,7 +64,9 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     sleep 2
   done
   if [ "$migrated" -ne 1 ]; then
-    echo "WARNING: migrations failed — check Postgres is linked (DATABASE_URL/DB_URL). Starting HTTP anyway." >&2
+    echo "WARNING: migrations failed — check Postgres is linked (DATABASE_URL/DB_URL)." >&2
+  else
+    echo "Migrations OK"
   fi
 fi
 
@@ -57,7 +74,6 @@ if [ "${RUN_SEED:-false}" = "true" ]; then
   php artisan db:seed --force --no-interaction || true
 fi
 
-# Prefer live env on Railway (avoids stale cached config on restarts)
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 

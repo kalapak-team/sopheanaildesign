@@ -11,7 +11,39 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\MediaController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+
+Route::get('/health', function () {
+    $database = 'ok';
+    $detail = null;
+    $tables = null;
+
+    try {
+        DB::connection()->getPdo();
+        $tables = [
+            'users' => Schema::hasTable('users'),
+            'personal_access_tokens' => Schema::hasTable('personal_access_tokens'),
+            'site_settings' => Schema::hasTable('site_settings'),
+        ];
+        if (! $tables['users'] || ! $tables['site_settings']) {
+            $database = 'migrating';
+            $detail = 'Connected, but migrations may not have run yet.';
+        }
+    } catch (\Throwable $e) {
+        $database = 'error';
+        $detail = $e->getMessage();
+    }
+
+    return response()->json([
+        'app' => 'ok',
+        'database' => $database,
+        'detail' => $detail,
+        'tables' => $tables,
+        'has_db_url' => filled(env('DB_URL') ?: env('DATABASE_URL')),
+    ], $database === 'error' ? 503 : 200);
+});
 
 Route::get('/site', [SiteController::class, 'index']);
 Route::post('/contact', [ContactController::class, 'store']);
