@@ -17,20 +17,29 @@ class StatsController extends Controller
 {
     public function index()
     {
-        return response()->json(Cache::remember('admin.stats', 60, function () {
-            return $this->buildStats();
-        }));
+        return response()->json($this->cachedStats());
     }
 
-    private function buildStats(): array
+    /** @return array<string, mixed> */
+    public function cachedStats(): array
+    {
+        return Cache::remember('admin.stats', 60, fn () => $this->buildStats());
+    }
+
+    /** @return array<string, mixed> */
+    public function buildStats(): array
     {
         $now = Carbon::now();
         $from = $now->copy()->subDays(6)->startOfDay();
 
+        $dayExpr = DB::connection()->getDriverName() === 'pgsql'
+            ? '(created_at::date)'
+            : 'DATE(created_at)';
+
         $countsByDay = ContactMessage::query()
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as aggregate')
+            ->selectRaw("{$dayExpr} as day, COUNT(*) as aggregate")
             ->where('created_at', '>=', $from)
-            ->groupBy(DB::raw('DATE(created_at)'))
+            ->groupBy(DB::raw($dayExpr))
             ->pluck('aggregate', 'day');
 
         $days = collect(range(6, 0))->map(function (int $ago) use ($now, $countsByDay) {
@@ -42,7 +51,7 @@ class StatsController extends Controller
                 'label' => $day->format('D'),
                 'count' => (int) ($countsByDay[$key] ?? 0),
             ];
-        });
+        })->values()->all();
 
         $unread = ContactMessage::query()->where('is_read', false)->count();
         $read = ContactMessage::query()->where('is_read', true)->count();
@@ -51,6 +60,21 @@ class StatsController extends Controller
         $promotions = Promotion::query()->count();
         $heroSlides = HeroSlide::query()->count();
         $gallery = GalleryImage::query()->count();
+
+        $recent = ContactMessage::query()
+            ->latest()
+            ->limit(5)
+            ->get(['id', 'name', 'email', 'message', 'is_read', 'created_at'])
+            ->map(fn (ContactMessage $m) => [
+                'id' => $m->id,
+                'name' => $m->name,
+                'email' => $m->email,
+                'message' => $m->message,
+                'is_read' => (bool) $m->is_read,
+                'created_at' => optional($m->created_at)?->toISOString() ?? (string) $m->created_at,
+            ])
+            ->values()
+            ->all();
 
         return [
             'totals' => [
@@ -74,10 +98,7 @@ class StatsController extends Controller
                 ['label' => 'Slides', 'value' => $heroSlides],
                 ['label' => 'Gallery', 'value' => $gallery],
             ],
-            'recent_messages' => ContactMessage::query()
-                ->latest()
-                ->limit(5)
-                ->get(['id', 'name', 'email', 'message', 'is_read', 'created_at']),
+            'recent_messages' => $recent,
         ];
     }
 }

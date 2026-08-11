@@ -123,7 +123,26 @@ export default function AdminDashboardPage() {
         handleUnauthorized();
         return;
       }
-      if (statsRes.ok) setStats(await statsRes.json());
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        if (statsData?.totals && typeof statsData.totals === "object") {
+          setStats({
+            ...statsData,
+            recent_messages: Array.isArray(statsData.recent_messages)
+              ? statsData.recent_messages
+              : [],
+            messages_last_7_days: Array.isArray(statsData.messages_last_7_days)
+              ? statsData.messages_last_7_days
+              : [],
+            message_status: Array.isArray(statsData.message_status)
+              ? statsData.message_status
+              : [],
+            content_mix: Array.isArray(statsData.content_mix)
+              ? statsData.content_mix
+              : [],
+          });
+        }
+      }
       setLoading(false);
 
       const res = await adminFetch("/bootstrap", token);
@@ -141,7 +160,23 @@ export default function AdminDashboardPage() {
         setUser(data.user);
         localStorage.setItem("admin_user", JSON.stringify(data.user));
       }
-      if (data.stats) setStats(data.stats);
+      if (data.stats?.totals && typeof data.stats.totals === "object") {
+        setStats({
+          ...data.stats,
+          recent_messages: Array.isArray(data.stats.recent_messages)
+            ? data.stats.recent_messages
+            : [],
+          messages_last_7_days: Array.isArray(data.stats.messages_last_7_days)
+            ? data.stats.messages_last_7_days
+            : [],
+          message_status: Array.isArray(data.stats.message_status)
+            ? data.stats.message_status
+            : [],
+          content_mix: Array.isArray(data.stats.content_mix)
+            ? data.stats.content_mix
+            : [],
+        });
+      }
       if (Array.isArray(data.messages)) setMessages(data.messages);
       if (Array.isArray(data.categories)) setCategories(data.categories);
       if (Array.isArray(data.promotions)) setPromotions(data.promotions);

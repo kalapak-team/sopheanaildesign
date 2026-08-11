@@ -7,14 +7,16 @@ export function BarChart({
 }: {
   data: { label: string; count: number }[];
 }) {
-  const max = Math.max(...data.map((d) => d.count), 1);
+  const rows = Array.isArray(data) ? data : [];
+  const max = Math.max(...rows.map((d) => d.count), 1);
   const w = 360;
   const h = 160;
   const pad = { top: 16, right: 12, bottom: 28, left: 28 };
   const innerW = w - pad.left - pad.right;
   const innerH = h - pad.top - pad.bottom;
   const gap = 10;
-  const barW = (innerW - gap * (data.length - 1)) / data.length;
+  const barW =
+    rows.length > 0 ? (innerW - gap * (rows.length - 1)) / rows.length : innerW;
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full" style={poppins}>
@@ -42,7 +44,7 @@ export function BarChart({
           </g>
         );
       })}
-      {data.map((d, i) => {
+      {rows.map((d, i) => {
         const barH = (d.count / max) * innerH;
         const x = pad.left + i * (barW + gap);
         const y = pad.top + innerH - barH;
@@ -94,7 +96,8 @@ export function DonutChart({
 }: {
   segments: { label: string; value: number; color: string }[];
 }) {
-  const total = segments.reduce((s, x) => s + x.value, 0) || 1;
+  const rows = Array.isArray(segments) ? segments : [];
+  const total = rows.reduce((s, x) => s + x.value, 0) || 1;
   const size = 160;
   const cx = size / 2;
   const cy = size / 2;
@@ -115,7 +118,7 @@ export function DonutChart({
           stroke="var(--admin-chart-grid, #f3f3f3)"
           strokeWidth={stroke}
         />
-        {segments.map((seg) => {
+        {rows.map((seg) => {
           const len = (seg.value / total) * circ;
           const el = (
             <circle
@@ -142,7 +145,7 @@ export function DonutChart({
           className="fill-neutral-900"
           style={{ fontSize: 22, fontWeight: 700, ...poppins }}
         >
-          {segments.reduce((s, x) => s + x.value, 0)}
+          {rows.reduce((s, x) => s + x.value, 0)}
         </text>
         <text
           x={cx}
@@ -155,7 +158,7 @@ export function DonutChart({
         </text>
       </svg>
       <div className="space-y-2" style={poppins}>
-        {segments.map((seg) => (
+        {rows.map((seg) => (
           <div key={seg.label} className="flex items-center gap-2 text-sm">
             <span
               className="h-2.5 w-2.5 rounded-full"
@@ -175,10 +178,11 @@ export function ContentMixBars({
 }: {
   data: { label: string; value: number }[];
 }) {
-  const max = Math.max(...data.map((d) => d.value), 1);
+  const rows = Array.isArray(data) ? data : [];
+  const max = Math.max(...rows.map((d) => d.value), 1);
   return (
     <div className="space-y-3" style={poppins}>
-      {data.map((d) => (
+      {rows.map((d) => (
         <div key={d.label}>
           <div className="mb-1 flex justify-between text-xs">
             <span className="font-medium text-neutral-600">{d.label}</span>

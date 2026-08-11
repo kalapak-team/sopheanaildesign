@@ -26,7 +26,7 @@ class AdminBootstrapController extends Controller
         $payload = Cache::remember("admin.bootstrap.{$userId}", 60, function () use ($request, $stats) {
             return [
                 'user' => $request->user(),
-                'stats' => $stats->index()->getData(true),
+                'stats' => $stats->cachedStats(),
                 'messages' => ContactMessage::query()->latest()->get(),
                 'categories' => ServiceCategory::query()
                     ->with(['services' => fn ($q) => $q->orderBy('sort_order')])
