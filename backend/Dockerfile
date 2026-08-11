@@ -40,8 +40,8 @@ RUN printf '%s\n' \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
-# Concurrent request workers (fixes slow admin Promise.all)
-ENV PHP_CLI_SERVER_WORKERS=4
+# Concurrent request workers for PHP built-in server
+ENV PHP_CLI_SERVER_WORKERS=8
 
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction

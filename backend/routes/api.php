@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AdminBootstrapController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\HeroSlideController;
@@ -59,6 +60,7 @@ Route::post('/contact', [ContactController::class, 'store']);
 Route::post('/admin/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/bootstrap', AdminBootstrapController::class);
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);

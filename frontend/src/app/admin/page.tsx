@@ -117,72 +117,35 @@ export default function AdminDashboardPage() {
     if (!token) return;
     setLoading(true);
     try {
-      // Load overview-critical data first so the dashboard isn't stuck waiting
-      // on every tab's endpoints at once.
-      const [statsRes, meRes] = await Promise.all([
-        adminFetch("/stats", token),
-        adminFetch("/me", token),
-      ]);
+      // One round-trip instead of ~9 — major speed win on Railway latency
+      const res = await adminFetch("/bootstrap", token);
 
-      if ([statsRes, meRes].some((r) => r.status === 401)) {
+      if (res.status === 401) {
         handleUnauthorized();
         return;
       }
 
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (meRes.ok) {
-        const me = await meRes.json();
-        if (me.user) {
-          setUser(me.user);
-          localStorage.setItem("admin_user", JSON.stringify(me.user));
-        }
-      }
-
-      setLoading(false);
-
-      const [
-        msgRes,
-        catRes,
-        promoRes,
-        hourRes,
-        settingsRes,
-        heroRes,
-        galleryRes,
-      ] = await Promise.all([
-        adminFetch("/messages", token),
-        adminFetch("/categories", token),
-        adminFetch("/promotions", token),
-        adminFetch("/opening-hours", token),
-        adminFetch("/settings", token),
-        adminFetch("/hero-slides", token),
-        adminFetch("/gallery", token),
-      ]);
-
-      if (
-        [
-          msgRes,
-          catRes,
-          promoRes,
-          hourRes,
-          settingsRes,
-          heroRes,
-          galleryRes,
-        ].some((r) => r.status === 401)
-      ) {
-        handleUnauthorized();
+      if (!res.ok) {
+        notify("error", "Daten konnten nicht geladen werden");
         return;
       }
 
-      if (msgRes.ok) setMessages(await msgRes.json());
-      if (catRes.ok) setCategories(await catRes.json());
-      if (promoRes.ok) setPromotions(await promoRes.json());
-      if (hourRes.ok) setHours(await hourRes.json());
-      if (settingsRes.ok) setSettings(await settingsRes.json());
-      if (heroRes.ok) setHeroSlides(await heroRes.json());
-      if (galleryRes.ok) setGallery(await galleryRes.json());
+      const data = await res.json();
+
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem("admin_user", JSON.stringify(data.user));
+      }
+      if (data.stats) setStats(data.stats);
+      if (Array.isArray(data.messages)) setMessages(data.messages);
+      if (Array.isArray(data.categories)) setCategories(data.categories);
+      if (Array.isArray(data.promotions)) setPromotions(data.promotions);
+      if (Array.isArray(data.opening_hours)) setHours(data.opening_hours);
+      if (data.settings) setSettings(data.settings);
+      if (Array.isArray(data.hero_slides)) setHeroSlides(data.hero_slides);
+      if (Array.isArray(data.gallery)) setGallery(data.gallery);
     } catch {
       notify("error", "Daten konnten nicht geladen werden");
-      setLoading(false);
     } finally {
       setLoading(false);
     }

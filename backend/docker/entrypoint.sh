@@ -75,17 +75,10 @@ if [ "${RUN_SEED:-false}" = "true" ]; then
   php artisan db:seed --force --no-interaction || true
 fi
 
-php artisan config:clear 2>/dev/null || true
-php artisan route:clear 2>/dev/null || true
+php artisan config:cache 2>/dev/null || true
+php artisan route:cache 2>/dev/null || true
 
 echo "Starting Laravel on 0.0.0.0:${PORT} (workers=${PHP_CLI_SERVER_WORKERS})"
 
-if [ "$1" = "php" ] && [ "$2" = "artisan" ] && [ "$3" = "serve" ]; then
-  exec php artisan serve --host=0.0.0.0 --port="$PORT"
-fi
-
-if [ "$1" = "apache2-foreground" ]; then
-  exec php artisan serve --host=0.0.0.0 --port="$PORT"
-fi
-
-exec "$@"
+# Use PHP built-in server directly so PHP_CLI_SERVER_WORKERS is respected
+exec php -S "0.0.0.0:${PORT}" -t public public/index.php
