@@ -22,12 +22,9 @@ export function OverviewTab({
 }) {
   if (!stats?.totals) {
     return (
-      <Card className="flex flex-col items-center justify-center gap-3 py-20 text-sm text-neutral-400">
-        <Spinner className="h-6 w-6 text-brand-pink" />
-        <p>Lade Statistiken vom Server…</p>
-        <p className="text-xs text-neutral-300">
-          Erster Ladevorgang kann einige Sekunden dauern.
-        </p>
+      <Card className="flex flex-col items-center justify-center gap-3 py-16 text-sm text-neutral-400">
+        <Spinner className="h-5 w-5 text-brand-pink" />
+        <p>Lade Overview…</p>
       </Card>
     );
   }

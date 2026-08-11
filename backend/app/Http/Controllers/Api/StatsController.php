@@ -4,11 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
-use App\Models\GalleryImage;
-use App\Models\HeroSlide;
-use App\Models\Promotion;
-use App\Models\Service;
-use App\Models\ServiceCategory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -36,30 +31,46 @@ class StatsController extends Controller
             ? '(created_at::date)'
             : 'DATE(created_at)';
 
+        // Parallel-ish cheap queries: day buckets + totals + recent + content counts
         $countsByDay = ContactMessage::query()
             ->selectRaw("{$dayExpr} as day, COUNT(*) as aggregate")
             ->where('created_at', '>=', $from)
             ->groupBy(DB::raw($dayExpr))
             ->pluck('aggregate', 'day');
 
-        $days = collect(range(6, 0))->map(function (int $ago) use ($now, $countsByDay) {
+        $msgTotals = ContactMessage::query()
+            ->selectRaw('COUNT(*) as total, COALESCE(SUM(CASE WHEN is_read = false THEN 1 ELSE 0 END), 0) as unread')
+            ->first();
+
+        $unread = (int) ($msgTotals->unread ?? 0);
+        $totalMessages = (int) ($msgTotals->total ?? 0);
+        $read = max(0, $totalMessages - $unread);
+
+        $content = DB::selectOne('
+            SELECT
+                (SELECT COUNT(*) FROM services) AS services,
+                (SELECT COUNT(*) FROM service_categories) AS categories,
+                (SELECT COUNT(*) FROM promotions) AS promotions,
+                (SELECT COUNT(*) FROM hero_slides) AS hero_slides,
+                (SELECT COUNT(*) FROM gallery_images) AS gallery
+        ');
+
+        $services = (int) ($content->services ?? 0);
+        $categories = (int) ($content->categories ?? 0);
+        $promotions = (int) ($content->promotions ?? 0);
+        $heroSlides = (int) ($content->hero_slides ?? 0);
+        $gallery = (int) ($content->gallery ?? 0);
+
+        $days = [];
+        foreach (range(6, 0) as $ago) {
             $day = $now->copy()->subDays($ago)->startOfDay();
             $key = $day->toDateString();
-
-            return [
+            $days[] = [
                 'date' => $key,
                 'label' => $day->format('D'),
                 'count' => (int) ($countsByDay[$key] ?? 0),
             ];
-        })->values()->all();
-
-        $unread = ContactMessage::query()->where('is_read', false)->count();
-        $read = ContactMessage::query()->where('is_read', true)->count();
-        $services = Service::query()->count();
-        $categories = ServiceCategory::query()->count();
-        $promotions = Promotion::query()->count();
-        $heroSlides = HeroSlide::query()->count();
-        $gallery = GalleryImage::query()->count();
+        }
 
         $recent = ContactMessage::query()
             ->latest()
@@ -78,7 +89,7 @@ class StatsController extends Controller
 
         return [
             'totals' => [
-                'messages' => $unread + $read,
+                'messages' => $totalMessages,
                 'unread_messages' => $unread,
                 'read_messages' => $read,
                 'services' => $services,
