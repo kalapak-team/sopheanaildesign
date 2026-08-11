@@ -30,8 +30,9 @@ if [ -n "$DB_URL" ]; then
 fi
 
 export DB_SSLMODE="${DB_SSLMODE:-require}"
+export PHP_CLI_SERVER_WORKERS="${PHP_CLI_SERVER_WORKERS:-4}"
 
-echo "Boot: PORT=$PORT DB_CONNECTION=${DB_CONNECTION:-unset} has_DB_URL=$([ -n "$DB_URL" ] && echo yes || echo no)"
+echo "Boot: PORT=$PORT WORKERS=$PHP_CLI_SERVER_WORKERS DB_CONNECTION=${DB_CONNECTION:-unset} has_DB_URL=$([ -n "$DB_URL" ] && echo yes || echo no)"
 
 if [ -z "$DB_URL" ] && [ -z "$DB_HOST" ]; then
   echo "ERROR: No database configured. Link Railway Postgres and set DATABASE_URL (or DB_URL)." >&2
@@ -77,18 +78,14 @@ fi
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 
-# Bind Apache to Railway's dynamic PORT
-if [ -f /etc/apache2/ports.conf ]; then
-  sed -ri "s/^Listen .*/Listen ${PORT}/" /etc/apache2/ports.conf
-  for conf in /etc/apache2/sites-available/*.conf /etc/apache2/sites-enabled/*.conf; do
-    [ -f "$conf" ] || continue
-    sed -ri "s/:80>/:${PORT}>/g; s/Listen 80/Listen ${PORT}/g" "$conf" || true
-  done
-  echo "Starting Apache on 0.0.0.0:${PORT}"
-fi
+echo "Starting Laravel on 0.0.0.0:${PORT} (workers=${PHP_CLI_SERVER_WORKERS})"
 
 if [ "$1" = "php" ] && [ "$2" = "artisan" ] && [ "$3" = "serve" ]; then
-  exec apache2-foreground
+  exec php artisan serve --host=0.0.0.0 --port="$PORT"
+fi
+
+if [ "$1" = "apache2-foreground" ]; then
+  exec php artisan serve --host=0.0.0.0 --port="$PORT"
 fi
 
 exec "$@"
