@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\HeroSlide;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,9 @@ class HeroSlideController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        return response()->json(HeroSlide::query()->create($data), 201);
+        $item = HeroSlide::query()->create($data);
+        AppCache::flushAll();
+        return response()->json($item, 201);
     }
 
     public function update(Request $request, HeroSlide $heroSlide)
@@ -38,6 +41,7 @@ class HeroSlideController extends Controller
 
         $heroSlide->update($data);
 
+        AppCache::flushAll();
         return response()->json($heroSlide);
     }
 
@@ -45,6 +49,7 @@ class HeroSlideController extends Controller
     {
         $heroSlide->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 }

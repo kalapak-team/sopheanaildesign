@@ -70,7 +70,8 @@ export const API_URL =
 export async function fetchSiteData(): Promise<SiteData | null> {
   try {
     const res = await fetch(`${API_URL}/site`, {
-      next: { revalidate: 30 },
+      next: { revalidate: 120 },
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return null;
     return res.json();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
@@ -27,7 +28,9 @@ class ServiceController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        return response()->json(ServiceCategory::query()->create($data), 201);
+        $category = ServiceCategory::query()->create($data);
+        AppCache::flushAll();
+        return response()->json($category, 201);
     }
 
     public function updateCategory(Request $request, ServiceCategory $category)
@@ -42,6 +45,7 @@ class ServiceController extends Controller
 
         $category->update($data);
 
+        AppCache::flushAll();
         return response()->json($category->fresh('services'));
     }
 
@@ -49,6 +53,7 @@ class ServiceController extends Controller
     {
         $category->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 
@@ -65,7 +70,9 @@ class ServiceController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        return response()->json(Service::query()->create($data), 201);
+        $service = Service::query()->create($data);
+        AppCache::flushAll();
+        return response()->json($service, 201);
     }
 
     public function update(Request $request, Service $service)
@@ -83,6 +90,7 @@ class ServiceController extends Controller
 
         $service->update($data);
 
+        AppCache::flushAll();
         return response()->json($service);
     }
 
@@ -90,6 +98,7 @@ class ServiceController extends Controller
     {
         $service->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 }

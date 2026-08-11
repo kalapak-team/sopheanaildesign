@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,7 @@ class ContactController extends Controller
 
         $message = ContactMessage::query()->create($data);
 
+        AppCache::flushAll();
         return response()->json([
             'message' => 'Thank you! Your submission has been received!',
             'data' => $message,
@@ -34,6 +36,7 @@ class ContactController extends Controller
     {
         $contact->update(['is_read' => true]);
 
+        AppCache::flushAll();
         return response()->json($contact);
     }
 
@@ -41,6 +44,7 @@ class ContactController extends Controller
     {
         $contact->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 }

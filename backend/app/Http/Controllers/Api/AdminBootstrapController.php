@@ -27,7 +27,11 @@ class AdminBootstrapController extends Controller
             return [
                 'user' => $request->user(),
                 'stats' => $stats->cachedStats(),
-                'messages' => ContactMessage::query()->latest()->get(),
+                // Cap list payload — full history still available via GET /admin/messages
+                'messages' => ContactMessage::query()
+                    ->latest()
+                    ->limit(50)
+                    ->get(['id', 'name', 'email', 'phone', 'message', 'is_read', 'created_at']),
                 'categories' => ServiceCategory::query()
                     ->with(['services' => fn ($q) => $q->orderBy('sort_order')])
                     ->orderBy('sort_order')
@@ -52,5 +56,6 @@ class AdminBootstrapController extends Controller
             Cache::forget("admin.bootstrap.{$userId}");
         }
         Cache::forget('admin.stats');
+        Cache::forget('site.public');
     }
 }

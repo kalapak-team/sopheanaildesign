@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SiteSettings } from "@/lib/api";
 
 const ELF_SIGHT_APP_ID = "6977d479-4143-42d0-bcb8-2d139541316a";
@@ -131,22 +131,45 @@ function installElfsightLayoutPatch() {
 /**
  * Instagram section — Elfsight feed (same widget id as the Webflow site),
  * with a local fallback if Elfsight is temporarily unavailable.
+ * Script loads only when the section nears the viewport.
  */
 export function InstagramSection({ settings }: { settings: SiteSettings }) {
   const [showFallback, setShowFallback] = useState(false);
   const [patchReady, setPatchReady] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
   const instagramUrl =
     settings.instagram || "https://www.instagram.com/sopheanaildesign/";
 
   useEffect(() => {
-    installElfsightLayoutPatch();
-    setPatchReady(true);
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
+    if (!shouldLoad) return;
+    installElfsightLayoutPatch();
+    setPatchReady(true);
+  }, [shouldLoad]);
+
+  useEffect(() => {
+    if (!shouldLoad || showFallback) return;
+
     const timer = window.setTimeout(() => {
       const root = document.querySelector(`.elfsight-app-${ELF_SIGHT_APP_ID}`);
-      // Elfsight injects iframes/widgets; if still empty or shows error text, fall back
       const text = root?.textContent?.toLowerCase() ?? "";
       const hasWidget = Boolean(
         root?.querySelector("iframe, [class*='Widget'], [class*='eapps']")
@@ -161,10 +184,13 @@ export function InstagramSection({ settings }: { settings: SiteSettings }) {
     }, 6000);
 
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [shouldLoad, showFallback]);
 
   return (
-    <section className="py-[60px] min-[768px]:py-[100px]">
+    <section
+      ref={sectionRef}
+      className="py-[60px] min-[768px]:py-[100px]"
+    >
       <div className="mx-auto w-[80%] max-w-[1200px]">
         <h1
           className="mx-auto mb-16 w-[80%] max-w-[1151px] text-center text-[32px] font-bold uppercase leading-none tracking-[-1.5px] text-black min-[768px]:mb-[80px] min-[768px]:text-[64px]"
@@ -175,7 +201,7 @@ export function InstagramSection({ settings }: { settings: SiteSettings }) {
       </div>
 
       <div className="mx-auto w-full max-w-[940px] px-5">
-        {!showFallback && (
+        {shouldLoad && !showFallback && (
           <div
             className={`elfsight-app-${ELF_SIGHT_APP_ID}`}
             data-elfsight-app-lazy
@@ -210,7 +236,7 @@ export function InstagramSection({ settings }: { settings: SiteSettings }) {
         )}
       </div>
 
-      {!showFallback && patchReady && (
+      {shouldLoad && !showFallback && patchReady && (
         <Script
           src="https://static.elfsight.com/platform/platform.js"
           strategy="lazyOnload"

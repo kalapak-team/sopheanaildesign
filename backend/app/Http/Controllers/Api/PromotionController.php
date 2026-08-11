@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,9 @@ class PromotionController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
-        return response()->json(Promotion::query()->create($data), 201);
+        $item = Promotion::query()->create($data);
+        AppCache::flushAll();
+        return response()->json($item, 201);
     }
 
     public function update(Request $request, Promotion $promotion)
@@ -48,6 +51,7 @@ class PromotionController extends Controller
 
         $promotion->update($data);
 
+        AppCache::flushAll();
         return response()->json($promotion);
     }
 
@@ -55,6 +59,7 @@ class PromotionController extends Controller
     {
         $promotion->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\OpeningHour;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,9 @@ class OpeningHourController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        return response()->json(OpeningHour::query()->create($data), 201);
+        $item = OpeningHour::query()->create($data);
+        AppCache::flushAll();
+        return response()->json($item, 201);
     }
 
     public function update(Request $request, OpeningHour $openingHour)
@@ -36,6 +39,7 @@ class OpeningHourController extends Controller
 
         $openingHour->update($data);
 
+        AppCache::flushAll();
         return response()->json($openingHour);
     }
 
@@ -43,6 +47,7 @@ class OpeningHourController extends Controller
     {
         $openingHour->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\GalleryImage;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,9 @@ class GalleryController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        return response()->json(GalleryImage::query()->create($data), 201);
+        $item = GalleryImage::query()->create($data);
+        AppCache::flushAll();
+        return response()->json($item, 201);
     }
 
     public function update(Request $request, GalleryImage $gallery)
@@ -38,6 +41,7 @@ class GalleryController extends Controller
 
         $gallery->update($data);
 
+        AppCache::flushAll();
         return response()->json($gallery);
     }
 
@@ -45,6 +49,7 @@ class GalleryController extends Controller
     {
         $gallery->delete();
 
+        AppCache::flushAll();
         return response()->json(['message' => 'Deleted']);
     }
 }

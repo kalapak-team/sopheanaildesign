@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 
@@ -24,6 +25,7 @@ class SettingController extends Controller
             SiteSetting::putValue($key, $value);
         }
 
+        AppCache::flushAll();
         return response()->json(SiteSetting::query()->pluck('value', 'key'));
     }
 }

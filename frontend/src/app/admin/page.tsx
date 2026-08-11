@@ -113,84 +113,61 @@ export default function AdminDashboardPage() {
     router.replace("/admin/login");
   }, [router]);
 
-  const loadAll = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      // Show Overview ASAP from lightweight stats, then fill the rest
-      const statsRes = await adminFetch("/stats", token);
-      if (statsRes.status === 401) {
-        handleUnauthorized();
-        return;
-      }
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        if (statsData?.totals && typeof statsData.totals === "object") {
+  const loadAll = useCallback(
+    async (opts?: { soft?: boolean }) => {
+      if (!token) return;
+      const soft = Boolean(opts?.soft);
+      if (!soft) setLoading(true);
+      try {
+        // Single bootstrap call (includes stats) — no sequential /stats waterfall
+        const path = soft ? "/bootstrap?fresh=1" : "/bootstrap";
+        const res = await adminFetch(path, token);
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        if (!res.ok) {
+          notify("error", "Daten konnten nicht geladen werden");
+          return;
+        }
+
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+          localStorage.setItem("admin_user", JSON.stringify(data.user));
+        }
+        if (data.stats?.totals && typeof data.stats.totals === "object") {
           setStats({
-            ...statsData,
-            recent_messages: Array.isArray(statsData.recent_messages)
-              ? statsData.recent_messages
+            ...data.stats,
+            recent_messages: Array.isArray(data.stats.recent_messages)
+              ? data.stats.recent_messages
               : [],
-            messages_last_7_days: Array.isArray(statsData.messages_last_7_days)
-              ? statsData.messages_last_7_days
+            messages_last_7_days: Array.isArray(data.stats.messages_last_7_days)
+              ? data.stats.messages_last_7_days
               : [],
-            message_status: Array.isArray(statsData.message_status)
-              ? statsData.message_status
+            message_status: Array.isArray(data.stats.message_status)
+              ? data.stats.message_status
               : [],
-            content_mix: Array.isArray(statsData.content_mix)
-              ? statsData.content_mix
+            content_mix: Array.isArray(data.stats.content_mix)
+              ? data.stats.content_mix
               : [],
           });
         }
-      }
-      setLoading(false);
-
-      const res = await adminFetch("/bootstrap", token);
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
-      }
-      if (!res.ok) {
+        if (Array.isArray(data.messages)) setMessages(data.messages);
+        if (Array.isArray(data.categories)) setCategories(data.categories);
+        if (Array.isArray(data.promotions)) setPromotions(data.promotions);
+        if (Array.isArray(data.opening_hours)) setHours(data.opening_hours);
+        if (data.settings) setSettings(data.settings);
+        if (Array.isArray(data.hero_slides)) setHeroSlides(data.hero_slides);
+        if (Array.isArray(data.gallery)) setGallery(data.gallery);
+      } catch {
         notify("error", "Daten konnten nicht geladen werden");
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      const data = await res.json();
-      if (data.user) {
-        setUser(data.user);
-        localStorage.setItem("admin_user", JSON.stringify(data.user));
-      }
-      if (data.stats?.totals && typeof data.stats.totals === "object") {
-        setStats({
-          ...data.stats,
-          recent_messages: Array.isArray(data.stats.recent_messages)
-            ? data.stats.recent_messages
-            : [],
-          messages_last_7_days: Array.isArray(data.stats.messages_last_7_days)
-            ? data.stats.messages_last_7_days
-            : [],
-          message_status: Array.isArray(data.stats.message_status)
-            ? data.stats.message_status
-            : [],
-          content_mix: Array.isArray(data.stats.content_mix)
-            ? data.stats.content_mix
-            : [],
-        });
-      }
-      if (Array.isArray(data.messages)) setMessages(data.messages);
-      if (Array.isArray(data.categories)) setCategories(data.categories);
-      if (Array.isArray(data.promotions)) setPromotions(data.promotions);
-      if (Array.isArray(data.opening_hours)) setHours(data.opening_hours);
-      if (data.settings) setSettings(data.settings);
-      if (Array.isArray(data.hero_slides)) setHeroSlides(data.hero_slides);
-      if (Array.isArray(data.gallery)) setGallery(data.gallery);
-    } catch {
-      notify("error", "Daten konnten nicht geladen werden");
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, handleUnauthorized]);
+    },
+    [token, handleUnauthorized]
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -227,7 +204,7 @@ export default function AdminDashboardPage() {
   const tabProps = {
     token,
     notify,
-    onReload: loadAll,
+    onReload: () => loadAll({ soft: true }),
     handleUnauthorized,
   };
 
