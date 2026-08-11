@@ -57,25 +57,27 @@ export function Footer({
     >
       <div className="mx-auto w-[90%] max-w-[1280px] py-12 min-[768px]:py-16 min-[992px]:py-20">
         <div className="grid grid-cols-1 gap-y-12 min-[768px]:gap-y-12 min-[992px]:grid-cols-[0.75fr_auto] min-[992px]:items-start min-[992px]:gap-x-[8vw]">
-          {/* Logo + phone */}
+          {/* Logo + phone — phone always centered under logo */}
           <div className="flex flex-col items-center min-[992px]:max-w-[32rem] min-[992px]:items-start">
-            <a href="#home" className="mb-6 block w-[340px] max-w-full min-[480px]:w-[400px] min-[992px]:mb-8 min-[992px]:w-[520px]">
-              <Image
-                src={footerLogo}
-                alt="Sophea Naildesign"
-                width={632}
-                height={256}
-                sizes="(max-width: 991px) 400px, 520px"
-                unoptimized
-                className="h-auto w-full"
-              />
-            </a>
-            <a
-              href={`tel:${phone.replace(/\s/g, "")}`}
-              className="mt-2 block whitespace-nowrap text-center text-[30px] font-bold leading-[1.2] text-[#fffdfd] min-[480px]:text-[35px] min-[992px]:mt-5 min-[992px]:pb-24 min-[992px]:text-left min-[992px]:text-[40px]"
-            >
-              {phone}
-            </a>
+            <div className="flex w-[340px] max-w-full flex-col items-center min-[480px]:w-[400px] min-[992px]:w-[520px]">
+              <a href="#home" className="mb-6 block w-full min-[992px]:mb-8">
+                <Image
+                  src={footerLogo}
+                  alt="Sophea Naildesign"
+                  width={632}
+                  height={256}
+                  sizes="(max-width: 991px) 400px, 520px"
+                  unoptimized
+                  className="h-auto w-full"
+                />
+              </a>
+              <a
+                href={`tel:${phone.replace(/\s/g, "")}`}
+                className="mt-2 block w-full whitespace-nowrap text-center text-[30px] font-bold leading-[1.2] text-[#fffdfd] min-[480px]:text-[35px] min-[992px]:mt-5 min-[992px]:pb-24 min-[992px]:text-[40px]"
+              >
+                {phone}
+              </a>
+            </div>
           </div>
 
           {/* Hours | Standort+nav | Social */}
