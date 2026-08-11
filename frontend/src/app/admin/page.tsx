@@ -46,6 +46,11 @@ import type {
   SiteSettings,
 } from "@/components/admin/types";
 import { poppins } from "@/components/admin/types";
+import {
+  clearCachedStats,
+  readCachedStats,
+  writeCachedStats,
+} from "@/components/admin/statsCache";
 
 const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -80,7 +85,7 @@ export default function AdminDashboardPage() {
   });
   const [tab, setTab] = useState<TabId>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !readCachedStats());
   const [tabLoading, setTabLoading] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [loadedTabs, setLoadedTabs] = useState<Partial<Record<TabId, boolean>>>(
@@ -88,7 +93,7 @@ export default function AdminDashboardPage() {
   );
   const loadedTabsRef = useRef<Partial<Record<TabId, boolean>>>({});
 
-  const [stats, setStats] = useState<StatsData | null>(null);
+  const [stats, setStats] = useState<StatsData | null>(() => readCachedStats());
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
@@ -126,6 +131,7 @@ export default function AdminDashboardPage() {
   const handleUnauthorized = useCallback(() => {
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_user");
+    clearCachedStats();
     router.replace("/admin/login");
   }, [router]);
 
@@ -207,29 +213,46 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  /** First paint: ONLY /stats — never block on full CMS bootstrap */
-  const loadOverview = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const res = await adminFetch("/stats", token);
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
+  /** Stale-while-revalidate: show cached Overview instantly, refresh in background */
+  const loadOverview = useCallback(
+    async (opts?: { force?: boolean }) => {
+      if (!token) return;
+
+      const cached = readCachedStats();
+      if (cached && !opts?.force) {
+        setStats(cached);
+        setLoading(false);
+      } else if (!cached) {
+        setLoading(true);
       }
-      if (!res.ok) {
-        notify("error", "Overview konnte nicht geladen werden");
-        return;
+
+      try {
+        const res = await adminFetch("/stats", token);
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        if (!res.ok) {
+          if (!cached) notify("error", "Overview konnte nicht geladen werden");
+          return;
+        }
+        const normalized = normalizeStats(await res.json());
+        if (normalized) {
+          setStats(normalized);
+          writeCachedStats(normalized);
+        }
+        loadedTabsRef.current.overview = true;
+        setLoadedTabs((prev) => ({ ...prev, overview: true }));
+      } catch {
+        if (!readCachedStats()) {
+          notify("error", "Overview konnte nicht geladen werden");
+        }
+      } finally {
+        setLoading(false);
       }
-      const normalized = normalizeStats(await res.json());
-      if (normalized) setStats(normalized);
-      setLoadedTabs((prev) => ({ ...prev, overview: true }));
-    } catch {
-      notify("error", "Overview konnte nicht geladen werden");
-    } finally {
-      setLoading(false);
-    }
-  }, [token, handleUnauthorized, normalizeStats]);
+    },
+    [token, handleUnauthorized, normalizeStats]
+  );
 
   /** Lazy-load one tab's data when opened */
   const loadTab = useCallback(
@@ -237,11 +260,7 @@ export default function AdminDashboardPage() {
       if (!token) return;
       if (id === "profile") return;
       if (id === "overview") {
-        if (opts?.force || !loadedTabsRef.current.overview) {
-          await loadOverview();
-          loadedTabsRef.current.overview = true;
-          setLoadedTabs((prev) => ({ ...prev, overview: true }));
-        }
+        await loadOverview({ force: Boolean(opts?.force) });
         return;
       }
       if (!opts?.force && loadedTabsRef.current[id]) return;
@@ -281,10 +300,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (!token) return;
-    void loadOverview().then(() => {
-      loadedTabsRef.current.overview = true;
-      setLoadedTabs((prev) => ({ ...prev, overview: true }));
-    });
+    void loadOverview();
   }, [token, loadOverview]);
 
   useEffect(() => {
@@ -298,6 +314,7 @@ export default function AdminDashboardPage() {
     }
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_user");
+    clearCachedStats();
     router.replace("/admin/login");
   }
 
