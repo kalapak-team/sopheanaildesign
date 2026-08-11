@@ -10,11 +10,19 @@ use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class StatsController extends Controller
 {
     public function index()
+    {
+        return response()->json(Cache::remember('admin.stats', 60, function () {
+            return $this->buildStats();
+        }));
+    }
+
+    private function buildStats(): array
     {
         $now = Carbon::now();
         $from = $now->copy()->subDays(6)->startOfDay();
@@ -44,7 +52,7 @@ class StatsController extends Controller
         $heroSlides = HeroSlide::query()->count();
         $gallery = GalleryImage::query()->count();
 
-        return response()->json([
+        return [
             'totals' => [
                 'messages' => $unread + $read,
                 'unread_messages' => $unread,
@@ -70,6 +78,6 @@ class StatsController extends Controller
                 ->latest()
                 ->limit(5)
                 ->get(['id', 'name', 'email', 'message', 'is_read', 'created_at']),
-        ]);
+        ];
     }
 }

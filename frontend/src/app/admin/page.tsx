@@ -117,21 +117,26 @@ export default function AdminDashboardPage() {
     if (!token) return;
     setLoading(true);
     try {
-      // One round-trip instead of ~9 — major speed win on Railway latency
-      const res = await adminFetch("/bootstrap", token);
+      // Show Overview ASAP from lightweight stats, then fill the rest
+      const statsRes = await adminFetch("/stats", token);
+      if (statsRes.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+      if (statsRes.ok) setStats(await statsRes.json());
+      setLoading(false);
 
+      const res = await adminFetch("/bootstrap", token);
       if (res.status === 401) {
         handleUnauthorized();
         return;
       }
-
       if (!res.ok) {
         notify("error", "Daten konnten nicht geladen werden");
         return;
       }
 
       const data = await res.json();
-
       if (data.user) {
         setUser(data.user);
         localStorage.setItem("admin_user", JSON.stringify(data.user));
@@ -146,6 +151,7 @@ export default function AdminDashboardPage() {
       if (Array.isArray(data.gallery)) setGallery(data.gallery);
     } catch {
       notify("error", "Daten konnten nicht geladen werden");
+      setLoading(false);
     } finally {
       setLoading(false);
     }

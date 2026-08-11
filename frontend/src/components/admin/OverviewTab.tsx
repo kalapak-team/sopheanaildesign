@@ -8,7 +8,7 @@ import {
   Images,
   Layers,
 } from "lucide-react";
-import { Card, SectionHeader } from "./ui";
+import { Card, SectionHeader, Spinner } from "./ui";
 import { BarChart, DonutChart, ContentMixBars } from "./charts";
 import type { StatsData } from "./types";
 import { poppins } from "./types";
@@ -22,8 +22,12 @@ export function OverviewTab({
 }) {
   if (!stats) {
     return (
-      <Card className="flex items-center justify-center py-20 text-sm text-neutral-400">
-        Lade Statistiken…
+      <Card className="flex flex-col items-center justify-center gap-3 py-20 text-sm text-neutral-400">
+        <Spinner className="h-6 w-6 text-brand-pink" />
+        <p>Lade Statistiken vom Server…</p>
+        <p className="text-xs text-neutral-300">
+          Erster Ladevorgang kann einige Sekunden dauern.
+        </p>
       </Card>
     );
   }
