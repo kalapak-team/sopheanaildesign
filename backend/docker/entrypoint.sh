@@ -77,9 +77,18 @@ fi
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 
+# Bind Apache to Railway's dynamic PORT
+if [ -f /etc/apache2/ports.conf ]; then
+  sed -ri "s/^Listen .*/Listen ${PORT}/" /etc/apache2/ports.conf
+  for conf in /etc/apache2/sites-available/*.conf /etc/apache2/sites-enabled/*.conf; do
+    [ -f "$conf" ] || continue
+    sed -ri "s/:80>/:${PORT}>/g; s/Listen 80/Listen ${PORT}/g" "$conf" || true
+  done
+  echo "Starting Apache on 0.0.0.0:${PORT}"
+fi
+
 if [ "$1" = "php" ] && [ "$2" = "artisan" ] && [ "$3" = "serve" ]; then
-  echo "Starting Laravel on 0.0.0.0:${PORT}"
-  exec php artisan serve --host=0.0.0.0 --port="$PORT"
+  exec apache2-foreground
 fi
 
 exec "$@"

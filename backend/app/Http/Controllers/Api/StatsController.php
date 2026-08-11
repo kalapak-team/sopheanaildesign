@@ -10,37 +10,50 @@ use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class StatsController extends Controller
 {
     public function index()
     {
         $now = Carbon::now();
-        $days = collect(range(6, 0))->map(function (int $ago) use ($now) {
+        $from = $now->copy()->subDays(6)->startOfDay();
+
+        $countsByDay = ContactMessage::query()
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as aggregate')
+            ->where('created_at', '>=', $from)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->pluck('aggregate', 'day');
+
+        $days = collect(range(6, 0))->map(function (int $ago) use ($now, $countsByDay) {
             $day = $now->copy()->subDays($ago)->startOfDay();
+            $key = $day->toDateString();
 
             return [
-                'date' => $day->toDateString(),
+                'date' => $key,
                 'label' => $day->format('D'),
-                'count' => ContactMessage::query()
-                    ->whereDate('created_at', $day)
-                    ->count(),
+                'count' => (int) ($countsByDay[$key] ?? 0),
             ];
         });
 
         $unread = ContactMessage::query()->where('is_read', false)->count();
         $read = ContactMessage::query()->where('is_read', true)->count();
+        $services = Service::query()->count();
+        $categories = ServiceCategory::query()->count();
+        $promotions = Promotion::query()->count();
+        $heroSlides = HeroSlide::query()->count();
+        $gallery = GalleryImage::query()->count();
 
         return response()->json([
             'totals' => [
-                'messages' => ContactMessage::query()->count(),
+                'messages' => $unread + $read,
                 'unread_messages' => $unread,
                 'read_messages' => $read,
-                'services' => Service::query()->count(),
-                'categories' => ServiceCategory::query()->count(),
-                'promotions' => Promotion::query()->count(),
-                'hero_slides' => HeroSlide::query()->count(),
-                'gallery' => GalleryImage::query()->count(),
+                'services' => $services,
+                'categories' => $categories,
+                'promotions' => $promotions,
+                'hero_slides' => $heroSlides,
+                'gallery' => $gallery,
             ],
             'messages_last_7_days' => $days,
             'message_status' => [
@@ -48,10 +61,10 @@ class StatsController extends Controller
                 ['label' => 'Read', 'value' => $read, 'color' => '#151515'],
             ],
             'content_mix' => [
-                ['label' => 'Services', 'value' => Service::query()->count()],
-                ['label' => 'Promos', 'value' => Promotion::query()->count()],
-                ['label' => 'Slides', 'value' => HeroSlide::query()->count()],
-                ['label' => 'Gallery', 'value' => GalleryImage::query()->count()],
+                ['label' => 'Services', 'value' => $services],
+                ['label' => 'Promos', 'value' => $promotions],
+                ['label' => 'Slides', 'value' => $heroSlides],
+                ['label' => 'Gallery', 'value' => $gallery],
             ],
             'recent_messages' => ContactMessage::query()
                 ->latest()

@@ -117,53 +117,19 @@ export default function AdminDashboardPage() {
     if (!token) return;
     setLoading(true);
     try {
-      const [
-        statsRes,
-        msgRes,
-        catRes,
-        promoRes,
-        hourRes,
-        settingsRes,
-        heroRes,
-        galleryRes,
-        meRes,
-      ] = await Promise.all([
+      // Load overview-critical data first so the dashboard isn't stuck waiting
+      // on every tab's endpoints at once.
+      const [statsRes, meRes] = await Promise.all([
         adminFetch("/stats", token),
-        adminFetch("/messages", token),
-        adminFetch("/categories", token),
-        adminFetch("/promotions", token),
-        adminFetch("/opening-hours", token),
-        adminFetch("/settings", token),
-        adminFetch("/hero-slides", token),
-        adminFetch("/gallery", token),
         adminFetch("/me", token),
       ]);
 
-      if (
-        [
-          statsRes,
-          msgRes,
-          catRes,
-          promoRes,
-          hourRes,
-          settingsRes,
-          heroRes,
-          galleryRes,
-          meRes,
-        ].some((r) => r.status === 401)
-      ) {
+      if ([statsRes, meRes].some((r) => r.status === 401)) {
         handleUnauthorized();
         return;
       }
 
       if (statsRes.ok) setStats(await statsRes.json());
-      if (msgRes.ok) setMessages(await msgRes.json());
-      if (catRes.ok) setCategories(await catRes.json());
-      if (promoRes.ok) setPromotions(await promoRes.json());
-      if (hourRes.ok) setHours(await hourRes.json());
-      if (settingsRes.ok) setSettings(await settingsRes.json());
-      if (heroRes.ok) setHeroSlides(await heroRes.json());
-      if (galleryRes.ok) setGallery(await galleryRes.json());
       if (meRes.ok) {
         const me = await meRes.json();
         if (me.user) {
@@ -171,8 +137,52 @@ export default function AdminDashboardPage() {
           localStorage.setItem("admin_user", JSON.stringify(me.user));
         }
       }
+
+      setLoading(false);
+
+      const [
+        msgRes,
+        catRes,
+        promoRes,
+        hourRes,
+        settingsRes,
+        heroRes,
+        galleryRes,
+      ] = await Promise.all([
+        adminFetch("/messages", token),
+        adminFetch("/categories", token),
+        adminFetch("/promotions", token),
+        adminFetch("/opening-hours", token),
+        adminFetch("/settings", token),
+        adminFetch("/hero-slides", token),
+        adminFetch("/gallery", token),
+      ]);
+
+      if (
+        [
+          msgRes,
+          catRes,
+          promoRes,
+          hourRes,
+          settingsRes,
+          heroRes,
+          galleryRes,
+        ].some((r) => r.status === 401)
+      ) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (msgRes.ok) setMessages(await msgRes.json());
+      if (catRes.ok) setCategories(await catRes.json());
+      if (promoRes.ok) setPromotions(await promoRes.json());
+      if (hourRes.ok) setHours(await hourRes.json());
+      if (settingsRes.ok) setSettings(await settingsRes.json());
+      if (heroRes.ok) setHeroSlides(await heroRes.json());
+      if (galleryRes.ok) setGallery(await galleryRes.json());
     } catch {
       notify("error", "Daten konnten nicht geladen werden");
+      setLoading(false);
     } finally {
       setLoading(false);
     }
