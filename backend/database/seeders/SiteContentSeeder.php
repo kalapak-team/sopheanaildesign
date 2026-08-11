@@ -28,6 +28,7 @@ class SiteContentSeeder extends Seeder
 
         $settings = [
             'business_name' => 'Sophea Naildesign',
+            'hero_brand_name' => 'SOPHEA NAILDESIGN',
             'phone' => '079 827 94 98',
             'phone_intl' => '+41 79 827 94 98',
             'address_line1' => 'Marktgasse 58',
@@ -48,14 +49,38 @@ class SiteContentSeeder extends Seeder
             'about_me_body' => "Ich beschränke die Maniküre nicht nur auf die Nägel. Die Pflege der Haut ist ebenso wichtig. Durch meine mehr als 25-jährige Erfahrung kann ich Damen und Herren umfassende Wellnessbehandlungen für Hände und Füße bieten.\n\nNach der Entfernung des alten Lacks kommen die Hände in ein Bad, das nicht nur die Nagelhaut löst, sondern auch die Haut pflegt und widerstandsfähiger gegen Umwelteinflüsse macht. Vor dem Auftragen des neuen Nageldesigns feile ich Deine Nägel in die optimale Form.",
             'study_label' => 'ÜBERRASCHENDE STUDIE',
             'study_title' => 'DARUM SOLLTEST DU ÖFTER INS NAGELSTUDIO GEHEN',
-            'study_body' => 'Diejenigen, die regelmäßig eine Maniküre genießen, sind sich des Effekts bewusst: Ein Besuch im Nagelstudio kann selbst den schlechtesten Tag aufhellen und zu einem positiven Erlebnis machen. Eine kürzlich durchgeführte Studie hat nun wissenschaftlich bestätigt, dass dieser Effekt real ist.',
+            'study_body' => 'Diejenigen, die regelmäßig eine Maniküre genießen, sind sich des Effekts bewusst: **Ein Besuch im Nagelstudio** kann selbst den schlechtesten Tag aufhellen und zu einem positiven Erlebnis machen. Eine kürzlich durchgeführte Studie hat nun wissenschaftlich bestätigt, dass dieser Effekt real ist. Atsushi Kawakubo, der Verfasser der Studie, betonte gegenüber dem Wissenschaftsmagazin "Psypost": "Es war längst überfällig. Es gibt zahlreiche Forschungsergebnisse, die auf die Wechselwirkung von Selbstfürsorge und deren Auswirkungen auf das psychische Wohlbefinden hinweisen. Die Vorstellung, dass etwas so Einfaches wie eine Maniküre einen Einfluss auf die psychische Gesundheit haben könnte, hat mich fasziniert."',
+            'study_link_url' => 'https://www.frontiersin.org/articles/10.3389/fpsyg.2023.1112110/full',
+            'study_benefits_heading' => 'Ein Nagelstudio bietet zahlreiche Vorteile, darunter:',
+            'study_benefit_1_title' => 'Professionelle Pflege:',
+            'study_benefit_1_text' => 'In einem Nagelstudio arbeiten erfahrene Nageltechniker, die über das notwendige Know-how und die Fähigkeiten verfügen, um eine professionelle Nagelpflege anzubieten.',
+            'study_benefit_2_title' => 'Entspannung und Wohlbefinden:',
+            'study_benefit_2_text' => 'Ein Besuch im Nagelstudio kann eine entspannende Erfahrung sein. Die Behandlungen bieten oft auch eine kurze Auszeit vom Alltagsstress und tragen zum allgemeinen Wohlbefinden bei.',
+            'study_benefit_3_title' => 'Selbstwertgefühl:',
+            'study_benefit_3_text' => 'Gepflegte Nägel können das Selbstwertgefühl steigern und ein Gefühl der Zufriedenheit und Selbstfürsorge fördern.',
+            'study_benefit_4_title' => 'Spezialisierte Behandlungen:',
+            'study_benefit_4_text' => 'Ein Nagelstudio bietet oft spezialisierte Behandlungen wie Nagelverlängerungen, Gel- oder Acrylnägel an, die zu Hause schwer umzusetzen sind.',
+            'services_heading' => 'Dienstleistungen',
             'promotions_heading' => 'PREIS REDUKTION NUR FÜR KURZE ZEIT!',
             'social_heading' => 'FOLGEN SIE UNS AUF INSTAGRAM UND FACEBOOK @SOPHEA NAILDESIGN',
             'copyright' => '© 2023 Sophea Naildesign. All rights reserved.',
+            'dark_hero_image' => '/images/hero/dark-hero.jpg',
+            'services_bg_image' => '/images/services/nail-studio-bg.jpg',
+            'services_nail_image' => '/images/services/nagel-1.jpg',
+            'about_portrait_image' => '/images/about/portrait.jpg',
+            'study_image' => '/images/about/nails-study.jpg',
+            'preisliste_image' => '/images/preise/preisliste.jpg',
+            'preisliste_bg_image' => '/images/backgrounds/nail-polish.jpg',
+            'logo_image' => '/images/brand/logo.png',
+            'logo_full_image' => '/images/brand/logo-full.png',
+            'logo_footer_image' => '/images/brand/logo-footer.png',
         ];
 
         foreach ($settings as $key => $value) {
-            SiteSetting::putValue($key, $value);
+            // Only fill missing keys so admin edits are preserved on re-seed.
+            if (SiteSetting::query()->where('key', $key)->doesntExist()) {
+                SiteSetting::putValue($key, $value);
+            }
         }
 
         HeroSlide::query()->delete();

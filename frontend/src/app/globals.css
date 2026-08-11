@@ -162,20 +162,13 @@ body {
   animation: hero-pop 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Nav: drop from top on first load */
-@keyframes nav-drop {
-  from {
-    opacity: 0;
-    transform: translateY(-48px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Hero nav: white underline on hover, no text jump */
+.hero-nav-link {
+  border-bottom: 4px solid transparent;
 }
 
-.nav-drop {
-  animation: nav-drop 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+.hero-nav-link:hover {
+  border-bottom-color: #ddd;
 }
 
 .hero-delay-1 { animation-delay: 0.08s; }
@@ -184,15 +177,8 @@ body {
 .hero-delay-4 { animation-delay: 0.5s; }
 .hero-delay-5 { animation-delay: 0.64s; }
 
-.nav-delay-1 { animation-delay: 0.05s; }
-.nav-delay-2 { animation-delay: 0.14s; }
-.nav-delay-3 { animation-delay: 0.23s; }
-.nav-delay-4 { animation-delay: 0.32s; }
-.nav-delay-5 { animation-delay: 0.41s; }
-
 @media (prefers-reduced-motion: reduce) {
-  .hero-pop,
-  .nav-drop {
+  .hero-pop {
     animation: none;
     opacity: 1;
     transform: none;

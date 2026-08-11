@@ -139,7 +139,7 @@ export function ProfileTab({
       label: "Website-Inhalte",
       desc: "Texte, Kontakt, Bilder",
       icon: Settings,
-      tab: "settings" as TabId,
+      tab: "content" as TabId,
     },
     {
       label: "Hero Slides",
@@ -408,9 +408,9 @@ export function ProfileTab({
               <button
                 type="button"
                 className="font-semibold text-brand-pink hover:underline"
-                onClick={() => onNavigate?.("settings")}
+                onClick={() => onNavigate?.("content")}
               >
-                Setting
+                Inhalte
               </button>
               .
             </p>

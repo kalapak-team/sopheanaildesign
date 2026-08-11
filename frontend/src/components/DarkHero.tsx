@@ -75,7 +75,9 @@ export function DarkHero({
               "linear-gradient(91deg, #fc03a1 0%, #fa009e 19%, #e8cd00 100%)",
           }}
         >
-          SOPHEA NAILDESIGN
+          {settings?.hero_brand_name ||
+            settings?.business_name ||
+            "SOPHEA NAILDESIGN"}
         </h1>
 
         <div className="hero-pop hero-delay-3 w-full max-w-[949px] pb-[8px]">

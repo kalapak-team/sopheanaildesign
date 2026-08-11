@@ -7,8 +7,7 @@ export type TabId =
   | "hours"
   | "content"
   | "messages"
-  | "profile"
-  | "settings";
+  | "profile";
 
 export type ToastState = { type: "success" | "error"; message: string } | null;
 

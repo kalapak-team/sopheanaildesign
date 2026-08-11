@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import type { SiteSettings } from "@/lib/api";
 import { settingImage } from "@/lib/media";
+import { TitleWithAccent } from "@/lib/content";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
 /**
@@ -45,12 +46,28 @@ function AboutCard({
   );
 }
 
+function formatSubtitle(subtitle: string) {
+  if (subtitle === "Gepflegte Hände stehen im Mittelpunkt") {
+    return (
+      <>
+        Gepflegte Hände
+        <br />
+        stehen im Mittelpunkt
+      </>
+    );
+  }
+  return subtitle;
+}
+
 export function AboutSection({ settings }: { settings: SiteSettings }) {
   const portrait = settingImage(
     settings,
     "about_portrait_image",
     "/images/about/portrait.jpg"
   );
+  const sectionTitle = settings.about_title || "Warum Sophea Naildesign";
+  const cardTitle = settings.about_title || "Warum Sophea Naildesign";
+  const meTitle = settings.about_me_title || "Über Mich";
 
   return (
     <section
@@ -63,7 +80,7 @@ export function AboutSection({ settings }: { settings: SiteSettings }) {
             className="pb-[90px] text-center text-[32px] font-bold uppercase leading-[75%] text-black min-[992px]:text-[48px]"
             style={{ fontFamily: "var(--font-poppins)" }}
           >
-            WARUM SOPHEA NAILDESIGN
+            {sectionTitle}
           </h2>
         </ScrollReveal>
         <ScrollReveal direction="up" delayMs={80}>
@@ -80,24 +97,9 @@ export function AboutSection({ settings }: { settings: SiteSettings }) {
         <div className="mx-auto mt-12 flex w-full flex-col items-center gap-6 min-[992px]:flex-row min-[992px]:items-center min-[992px]:justify-center min-[992px]:gap-6">
           <ScrollReveal direction="left" className="w-full min-[992px]:w-auto">
             <AboutCard
-              title={
-                <>
-                  WARUM <span className="text-brand-pink">SOPHEA NAILDESIGN</span>
-                </>
-              }
-              subtitle={
-                settings.about_subtitle ===
-                "Gepflegte Hände stehen im Mittelpunkt" ? (
-                  <>
-                    Gepflegte Hände
-                    <br />
-                    stehen im Mittelpunkt
-                  </>
-                ) : (
-                  settings.about_subtitle
-                )
-              }
-              body={settings.about_body}
+              title={<TitleWithAccent text={cardTitle} />}
+              subtitle={formatSubtitle(settings.about_subtitle || "")}
+              body={settings.about_body || ""}
             />
           </ScrollReveal>
 
@@ -125,13 +127,9 @@ export function AboutSection({ settings }: { settings: SiteSettings }) {
             className="w-full min-[992px]:w-auto"
           >
             <AboutCard
-              title={
-                <>
-                  ÜBER <span className="text-brand-pink">MICH</span>
-                </>
-              }
-              subtitle={settings.about_me_subtitle}
-              body={settings.about_me_body}
+              title={<TitleWithAccent text={meTitle} />}
+              subtitle={settings.about_me_subtitle || ""}
+              body={settings.about_me_body || ""}
             />
           </ScrollReveal>
         </div>

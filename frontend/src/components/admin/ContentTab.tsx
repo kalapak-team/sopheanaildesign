@@ -39,8 +39,8 @@ const GROUPS: Group[] = [
     icon: Phone,
     keys: [
       { key: "business_name", label: "Geschäftsname" },
-      { key: "phone", label: "Telefon" },
-      { key: "phone_intl", label: "Telefon (international)" },
+      { key: "phone", label: "Telefon (Hero / Anzeige)" },
+      { key: "phone_intl", label: "Telefon (international / Footer)" },
       { key: "address_line1", label: "Adresse Zeile 1" },
       { key: "address_line2", label: "Adresse Zeile 2" },
       { key: "website_url", label: "Website URL" },
@@ -73,9 +73,12 @@ const GROUPS: Group[] = [
   {
     id: "hero",
     title: "Hero",
-    description: "Tagline über dem Hero-Bereich",
+    description: "Markenname und Tagline im Hero",
     icon: Quote,
-    keys: [{ key: "hero_tagline", label: "Hero Tagline", multiline: true }],
+    keys: [
+      { key: "hero_brand_name", label: "Hero Markenname (große Überschrift)" },
+      { key: "hero_tagline", label: "Hero Tagline", multiline: true },
+    ],
   },
   {
     id: "about",
@@ -83,7 +86,7 @@ const GROUPS: Group[] = [
     description: "About- und About-me-Texte",
     icon: BookOpen,
     keys: [
-      { key: "about_title", label: "About Titel" },
+      { key: "about_title", label: "About Titel (Sektion + Karte)" },
       { key: "about_subtitle", label: "About Untertitel" },
       { key: "about_body", label: "About Text", multiline: true },
       { key: "about_me_title", label: "About Me Titel" },
@@ -94,12 +97,26 @@ const GROUPS: Group[] = [
   {
     id: "study",
     title: "Studie",
-    description: "Study-Sektion",
+    description: "Study-Sektion inkl. Vorteilskarten",
     icon: Type,
     keys: [
       { key: "study_label", label: "Label" },
       { key: "study_title", label: "Titel" },
-      { key: "study_body", label: "Text", multiline: true },
+      {
+        key: "study_body",
+        label: "Text (**Text** = pink fett, Wort „Studie“ wird verlinkt)",
+        multiline: true,
+      },
+      { key: "study_link_url", label: "Studie Link URL" },
+      { key: "study_benefits_heading", label: "Vorteile Überschrift" },
+      { key: "study_benefit_1_title", label: "Vorteil 1 Titel" },
+      { key: "study_benefit_1_text", label: "Vorteil 1 Text", multiline: true },
+      { key: "study_benefit_2_title", label: "Vorteil 2 Titel" },
+      { key: "study_benefit_2_text", label: "Vorteil 2 Text", multiline: true },
+      { key: "study_benefit_3_title", label: "Vorteil 3 Titel" },
+      { key: "study_benefit_3_text", label: "Vorteil 3 Text", multiline: true },
+      { key: "study_benefit_4_title", label: "Vorteil 4 Titel" },
+      { key: "study_benefit_4_text", label: "Vorteil 4 Text", multiline: true },
     ],
   },
   {
@@ -108,6 +125,7 @@ const GROUPS: Group[] = [
     description: "Sektions-Überschriften und Copyright",
     icon: FileText,
     keys: [
+      { key: "services_heading", label: "Dienstleistungen Überschrift" },
       { key: "promotions_heading", label: "Aktionen Überschrift" },
       { key: "social_heading", label: "Instagram / Social Überschrift" },
       { key: "copyright", label: "Copyright" },
@@ -295,7 +313,11 @@ export function ContentTab({
         open={!!activeGroup}
         title={activeGroup?.title ?? ""}
         description={activeGroup?.description}
-        wide={activeGroup?.id === "images" || activeGroup?.id === "about"}
+        wide={
+          activeGroup?.id === "images" ||
+          activeGroup?.id === "about" ||
+          activeGroup?.id === "study"
+        }
         onClose={closeModal}
         footer={
           activeGroup ? (

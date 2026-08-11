@@ -17,7 +17,6 @@ import {
   X,
   GalleryHorizontal,
   User,
-  Settings,
 } from "lucide-react";
 import { adminFetch } from "@/components/admin/api";
 import { Toast, Spinner } from "@/components/admin/ui";
@@ -65,7 +64,6 @@ const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
 
 const EXTRA_TITLES: Partial<Record<TabId, string>> = {
   profile: "My Profile",
-  settings: "Setting",
 };
 
 export default function AdminDashboardPage() {
@@ -202,7 +200,6 @@ export default function AdminDashboardPage() {
       case "hours":
         return "opening_hours";
       case "content":
-      case "settings":
         return "settings";
       case "messages":
         return "messages";
@@ -388,7 +385,7 @@ export default function AdminDashboardPage() {
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
           {TABS.map((t) => {
             const Icon = t.icon;
-            const active = tab === t.id || (t.id === "content" && tab === "settings");
+            const active = tab === t.id;
             const badge =
               t.id === "messages" && unreadCount > 0 ? unreadCount : null;
             return (
@@ -444,21 +441,6 @@ export default function AdminDashboardPage() {
             <User className="h-[18px] w-[18px] text-white/40" strokeWidth={2} />
             My Profile
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setTab("settings");
-              setSidebarOpen(false);
-            }}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-              tab === "settings"
-                ? "bg-white/10 text-white"
-                : "text-white/55 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            <Settings className="h-[18px] w-[18px] text-white/40" strokeWidth={2} />
-            Setting
-          </button>
           <Link
             href="/"
             target="_blank"
@@ -502,7 +484,7 @@ export default function AdminDashboardPage() {
             <ProfileMenu
               user={user}
               onProfile={() => setTab("profile")}
-              onSettings={() => setTab("settings")}
+              onInhalte={() => setTab("content")}
               onLogout={logout}
             />
           </div>
@@ -525,14 +507,6 @@ export default function AdminDashboardPage() {
           {tab === "hours" && <HoursTab hours={hours} {...tabProps} />}
           {tab === "content" && (
             <ContentTab settings={settings} {...tabProps} />
-          )}
-          {tab === "settings" && (
-            <ContentTab
-              settings={settings}
-              {...tabProps}
-              title="Setting"
-              description="Website-Texte, Kontakt und Bilder verwalten."
-            />
           )}
           {tab === "profile" && (
             <ProfileTab

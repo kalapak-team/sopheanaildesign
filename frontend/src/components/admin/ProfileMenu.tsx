@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { User, FileText, LogOut, ChevronDown } from "lucide-react";
 import { mediaUrl } from "./media";
 import { poppins } from "./types";
 
@@ -17,11 +17,11 @@ export type AdminUser = {
 type Props = {
   user: AdminUser | null;
   onProfile: () => void;
-  onSettings: () => void;
+  onInhalte: () => void;
   onLogout: () => void;
 };
 
-export function ProfileMenu({ user, onProfile, onSettings, onLogout }: Props) {
+export function ProfileMenu({ user, onProfile, onInhalte, onLogout }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -112,12 +112,12 @@ export function ProfileMenu({ user, onProfile, onSettings, onLogout }: Props) {
             role="menuitem"
             onClick={() => {
               setOpen(false);
-              onSettings();
+              onInhalte();
             }}
             className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 transition hover:bg-neutral-50 hover:text-brand-pink"
           >
-            <Settings className="h-4 w-4" />
-            Setting
+            <FileText className="h-4 w-4" />
+            Inhalte
           </button>
           <div className="my-1 border-t border-neutral-100" />
           <button

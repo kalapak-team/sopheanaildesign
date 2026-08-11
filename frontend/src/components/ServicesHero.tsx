@@ -46,7 +46,7 @@ export function ServicesHero({ settings }: { settings?: SiteSettings }) {
               "linear-gradient(97deg, #ff06a4, #db1568 20%, #ff006a 31%, #ff0079 46%, #ff2be3)",
           }}
         >
-          Dienstleistungen
+          {settings?.services_heading || "Dienstleistungen"}
         </h3>
         <Image
           src="/images/brand/brush.svg"
