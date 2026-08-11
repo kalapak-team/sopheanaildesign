@@ -18,7 +18,7 @@ class StatsController extends Controller
     /** @return array<string, mixed> */
     public function cachedStats(): array
     {
-        return Cache::remember('admin.stats', 60, fn () => $this->buildStats());
+        return Cache::remember('admin.stats.v2', 60, fn () => $this->buildStats());
     }
 
     /** @return array<string, mixed> */

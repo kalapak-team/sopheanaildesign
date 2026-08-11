@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -65,12 +65,28 @@ const EXTRA_TITLES: Partial<Record<TabId, string>> = {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("admin_token");
+  });
+  const [user, setUser] = useState<AdminUser | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("admin_user");
+      return raw ? (JSON.parse(raw) as AdminUser) : null;
+    } catch {
+      return null;
+    }
+  });
   const [tab, setTab] = useState<TabId>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
+  const [loadedTabs, setLoadedTabs] = useState<Partial<Record<TabId, boolean>>>(
+    {}
+  );
+  const loadedTabsRef = useRef<Partial<Record<TabId, boolean>>>({});
 
   const [stats, setStats] = useState<StatsData | null>(null);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
@@ -132,92 +148,149 @@ export default function AdminDashboardPage() {
     };
   }, []);
 
-  const loadAll = useCallback(
-    async (opts?: { soft?: boolean }) => {
-      if (!token) return;
-      const soft = Boolean(opts?.soft);
-      if (!soft) setLoading(true);
-
-      try {
-        // Parallel: light stats paints Overview ASAP; bootstrap fills CMS tabs
-        const statsPromise = adminFetch("/stats", token).then(async (res) => {
-          if (res.status === 401) return "unauthorized" as const;
-          if (!res.ok) return null;
-          return normalizeStats(await res.json());
-        });
-
-        const bootPromise = adminFetch(
-          soft ? "/bootstrap?fresh=1" : "/bootstrap",
-          token
-        ).then(async (res) => {
-          if (res.status === 401) return "unauthorized" as const;
-          if (!res.ok) return null;
-          return res.json();
-        });
-
-        // Apply stats as soon as ready (don't wait for bootstrap)
-        const statsResult = await statsPromise;
-        if (statsResult === "unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (statsResult) setStats(statsResult);
-        setLoading(false);
-
-        const bootResult = await bootPromise;
-        if (bootResult === "unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (!bootResult) {
-          if (!statsResult) {
-            notify("error", "Daten konnten nicht geladen werden");
-          }
-          return;
-        }
-
-        const data = bootResult as Record<string, unknown>;
-        if (data.user) {
-          setUser(data.user as AdminUser);
-          localStorage.setItem("admin_user", JSON.stringify(data.user));
-        }
-        const bootStats = normalizeStats(data.stats);
-        if (bootStats) setStats(bootStats);
-        if (Array.isArray(data.messages)) {
-          setMessages(data.messages as ContactMessage[]);
-        }
-        if (Array.isArray(data.categories)) {
-          setCategories(data.categories as ServiceCategory[]);
-        }
-        if (Array.isArray(data.promotions)) {
-          setPromotions(data.promotions as Promotion[]);
-        }
-        if (Array.isArray(data.opening_hours)) {
-          setHours(data.opening_hours as OpeningHour[]);
-        }
-        if (data.settings && typeof data.settings === "object") {
-          setSettings(data.settings as SiteSettings);
-        }
-        if (Array.isArray(data.hero_slides)) {
-          setHeroSlides(data.hero_slides as HeroSlide[]);
-        }
-        if (Array.isArray(data.gallery)) {
-          setGallery(data.gallery as GalleryImage[]);
-        }
-      } catch {
-        notify("error", "Daten konnten nicht geladen werden");
-        setLoading(false);
-      } finally {
-        setLoading(false);
+  const applyPartial = useCallback(
+    (data: Record<string, unknown>) => {
+      const bootStats = normalizeStats(data.stats);
+      if (bootStats) setStats(bootStats);
+      if (Array.isArray(data.messages)) {
+        setMessages(data.messages as ContactMessage[]);
+      }
+      if (Array.isArray(data.categories)) {
+        setCategories(data.categories as ServiceCategory[]);
+      }
+      if (Array.isArray(data.promotions)) {
+        setPromotions(data.promotions as Promotion[]);
+      }
+      if (Array.isArray(data.opening_hours)) {
+        setHours(data.opening_hours as OpeningHour[]);
+      }
+      if (data.settings && typeof data.settings === "object") {
+        setSettings(data.settings as SiteSettings);
+      }
+      if (Array.isArray(data.hero_slides)) {
+        setHeroSlides(data.hero_slides as HeroSlide[]);
+      }
+      if (Array.isArray(data.gallery)) {
+        setGallery(data.gallery as GalleryImage[]);
+      }
+      if (data.user && typeof data.user === "object") {
+        setUser(data.user as AdminUser);
+        localStorage.setItem("admin_user", JSON.stringify(data.user));
       }
     },
-    [token, handleUnauthorized, normalizeStats]
+    [normalizeStats]
   );
+
+  const tabOnlyKey = useCallback((id: TabId): string | null => {
+    switch (id) {
+      case "overview":
+        return "stats";
+      case "hero":
+        return "hero_slides";
+      case "services":
+        return "categories";
+      case "promotions":
+        return "promotions";
+      case "gallery":
+        return "gallery";
+      case "hours":
+        return "opening_hours";
+      case "content":
+      case "settings":
+        return "settings";
+      case "messages":
+        return "messages";
+      case "profile":
+        return null;
+      default:
+        return null;
+    }
+  }, []);
+
+  /** First paint: ONLY /stats — never block on full CMS bootstrap */
+  const loadOverview = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const res = await adminFetch("/stats", token);
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+      if (!res.ok) {
+        notify("error", "Overview konnte nicht geladen werden");
+        return;
+      }
+      const normalized = normalizeStats(await res.json());
+      if (normalized) setStats(normalized);
+      setLoadedTabs((prev) => ({ ...prev, overview: true }));
+    } catch {
+      notify("error", "Overview konnte nicht geladen werden");
+    } finally {
+      setLoading(false);
+    }
+  }, [token, handleUnauthorized, normalizeStats]);
+
+  /** Lazy-load one tab's data when opened */
+  const loadTab = useCallback(
+    async (id: TabId, opts?: { force?: boolean }) => {
+      if (!token) return;
+      if (id === "profile") return;
+      if (id === "overview") {
+        if (opts?.force || !loadedTabsRef.current.overview) {
+          await loadOverview();
+          loadedTabsRef.current.overview = true;
+          setLoadedTabs((prev) => ({ ...prev, overview: true }));
+        }
+        return;
+      }
+      if (!opts?.force && loadedTabsRef.current[id]) return;
+
+      const only = tabOnlyKey(id);
+      if (!only) return;
+
+      setTabLoading(true);
+      try {
+        const res = await adminFetch(
+          `/bootstrap?only=${encodeURIComponent(only)}${opts?.force ? "&fresh=1" : ""}`,
+          token
+        );
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        if (!res.ok) {
+          notify("error", "Daten konnten nicht geladen werden");
+          return;
+        }
+        applyPartial(await res.json());
+        loadedTabsRef.current[id] = true;
+        setLoadedTabs((prev) => ({ ...prev, [id]: true }));
+      } catch {
+        notify("error", "Daten konnten nicht geladen werden");
+      } finally {
+        setTabLoading(false);
+      }
+    },
+    [token, tabOnlyKey, loadOverview, handleUnauthorized, applyPartial]
+  );
+
+  const reloadCurrent = useCallback(async () => {
+    await loadTab(tab, { force: true });
+  }, [tab, loadTab]);
 
   useEffect(() => {
     if (!token) return;
-    void loadAll();
-  }, [token, loadAll]);
+    void loadOverview().then(() => {
+      loadedTabsRef.current.overview = true;
+      setLoadedTabs((prev) => ({ ...prev, overview: true }));
+    });
+  }, [token, loadOverview]);
+
+  useEffect(() => {
+    if (!token || tab === "overview") return;
+    void loadTab(tab);
+  }, [token, tab, loadTab]);
 
   async function logout() {
     if (token) {
@@ -251,7 +324,7 @@ export default function AdminDashboardPage() {
   const tabProps = {
     token,
     notify,
-    onReload: () => loadAll({ soft: true }),
+    onReload: reloadCurrent,
     handleUnauthorized,
   };
 
@@ -407,7 +480,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            {loading && <Spinner className="h-4 w-4" />}
+            {loading || tabLoading ? <Spinner className="h-4 w-4" /> : null}
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
             <ProfileMenu
               user={user}

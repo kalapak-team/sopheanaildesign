@@ -15,6 +15,7 @@ final class AppCache
     public static function flushSite(): void
     {
         Cache::forget('site.public');
+        Cache::forget('site.public.v2');
     }
 
     public static function flushAll(?int $userId = null): void
