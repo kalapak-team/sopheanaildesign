@@ -36,12 +36,21 @@ Route::get('/health', function () {
         $detail = $e->getMessage();
     }
 
+    $mediaDisk = (string) config('filesystems.media', 'public');
+    $r2 = config('filesystems.disks.r2', []);
+
     return response()->json([
         'app' => 'ok',
         'database' => $database,
         'detail' => $detail,
         'tables' => $tables,
         'has_db_url' => filled(env('DB_URL') ?: env('DATABASE_URL')),
+        'media' => [
+            'disk' => $mediaDisk,
+            'r2_configured' => $mediaDisk === 'r2' && filled($r2['key'] ?? null) && filled($r2['secret'] ?? null) && filled($r2['bucket'] ?? null) && filled($r2['endpoint'] ?? null) && filled($r2['url'] ?? null),
+            'r2_bucket' => $r2['bucket'] ?? null,
+            'r2_url_set' => filled($r2['url'] ?? null),
+        ],
     ], $database === 'error' ? 503 : 200);
 });
 
