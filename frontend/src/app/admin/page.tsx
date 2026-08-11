@@ -70,30 +70,21 @@ const EXTRA_TITLES: Partial<Record<TabId, string>> = {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("admin_token");
-  });
-  const [user, setUser] = useState<AdminUser | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem("admin_user");
-      return raw ? (JSON.parse(raw) as AdminUser) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Keep SSR + first client paint identical — hydrate from localStorage only after mount
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AdminUser | null>(null);
   const [tab, setTab] = useState<TabId>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(() => !readCachedStats());
+  const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
+  const [hydrated, setHydrated] = useState(false);
   const [loadedTabs, setLoadedTabs] = useState<Partial<Record<TabId, boolean>>>(
     {}
   );
   const loadedTabsRef = useRef<Partial<Record<TabId, boolean>>>({});
 
-  const [stats, setStats] = useState<StatsData | null>(() => readCachedStats());
+  const [stats, setStats] = useState<StatsData | null>(null);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
@@ -107,6 +98,7 @@ export default function AdminDashboardPage() {
     const t = localStorage.getItem("admin_token");
     if (!t) {
       router.replace("/admin/login");
+      setHydrated(true);
       return;
     }
     setToken(t);
@@ -116,6 +108,14 @@ export default function AdminDashboardPage() {
     } catch {
       /* ignore */
     }
+    const cached = readCachedStats();
+    if (cached) {
+      setStats(cached);
+      setLoading(false);
+      loadedTabsRef.current.overview = true;
+      setLoadedTabs((prev) => ({ ...prev, overview: true }));
+    }
+    setHydrated(true);
   }, [router]);
 
   useEffect(() => {
@@ -299,14 +299,14 @@ export default function AdminDashboardPage() {
   }, [tab, loadTab]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!hydrated || !token) return;
     void loadOverview();
-  }, [token, loadOverview]);
+  }, [hydrated, token, loadOverview]);
 
   useEffect(() => {
-    if (!token || tab === "overview") return;
+    if (!hydrated || !token || tab === "overview") return;
     void loadTab(tab);
-  }, [token, tab, loadTab]);
+  }, [hydrated, token, tab, loadTab]);
 
   async function logout() {
     if (token) {
@@ -318,7 +318,7 @@ export default function AdminDashboardPage() {
     router.replace("/admin/login");
   }
 
-  if (!token) {
+  if (!hydrated || !token) {
     return (
       <div
         className={`admin-app flex min-h-screen items-center justify-center ${
