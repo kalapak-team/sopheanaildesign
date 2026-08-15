@@ -7,8 +7,6 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2, Lock, Mail as MailIcon } from "lucide-react";
 import { API_URL } from "@/lib/api";
 
-const poppins = { fontFamily: "var(--font-poppins), Poppins, sans-serif" } as const;
-
 function friendlyError(status: number, data: unknown): string {
   if (data && typeof data === "object") {
     const body = data as {
@@ -94,8 +92,7 @@ export default function AdminLoginPage() {
 
   return (
     <div
-      className="relative flex min-h-screen flex-col items-center justify-center px-4 py-12"
-      style={poppins}
+      className="font-poppins relative flex min-h-screen flex-col items-center justify-center px-4 py-12"
     >
       {/* Soft brand atmosphere — no neon glow / grid */}
       <div className="absolute inset-0 bg-[#faf7f8]" />

@@ -3,16 +3,10 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import type { SiteSettings } from "@/lib/api";
-import { settingImage } from "@/lib/media";
+import { settingImage, shouldUnoptimize } from "@/lib/media";
 import { TitleWithAccent } from "@/lib/content";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
-/**
- * `.about-section` cards match sopheanaildesign.webflow.io:
- *  h5 title        — Poppins 20px / 600 / uppercase / lh 75% / pb 25px
- *  .paragraph-bold — 14px / 600 / lh 175% / pb 12.5px
- *  body p          — Poppins 14px / lh 175% / tracking .25px / pb 25px / #151515
- */
 function AboutCard({
   title,
   subtitle,
@@ -24,22 +18,13 @@ function AboutCard({
 }) {
   return (
     <article className="flex w-full flex-col items-center justify-center rounded-[20px] bg-white px-[25px] py-[40px] text-center shadow-[0_15px_50px_-15px_rgba(0,0,0,1)] min-[992px]:h-[600px] min-[992px]:w-[400px] min-[992px]:max-w-[400px] min-[992px]:shrink-0 min-[992px]:px-[28px] min-[992px]:py-[45px]">
-      <h5
-        className="pb-[25px] text-[22px] font-semibold uppercase leading-[75%] text-black"
-        style={{ fontFamily: "var(--font-poppins)" }}
-      >
+      <h5 className="pb-[25px] text-[22px] font-semibold uppercase leading-[75%] text-black">
         {title}
       </h5>
-      <p
-        className="pb-[12.5px] text-[14px] font-semibold leading-[175%] text-[#151515]"
-        style={{ fontFamily: "var(--font-poppins)" }}
-      >
+      <p className="pb-[12.5px] text-[14px] font-semibold leading-[175%] text-[#151515]">
         {subtitle}
       </p>
-      <p
-        className="whitespace-pre-line pb-[25px] text-[14px] font-normal leading-[175%] tracking-[0.25px] text-[#151515]"
-        style={{ fontFamily: "var(--font-poppins)" }}
-      >
+      <p className="whitespace-pre-line pb-[25px] text-[14px] font-normal leading-[175%] tracking-[0.25px] text-[#151515]">
         {body}
       </p>
     </article>
@@ -76,10 +61,7 @@ export function AboutSection({ settings }: { settings: SiteSettings }) {
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col items-center">
         <ScrollReveal direction="up">
-          <h2
-            className="pb-[90px] text-center text-[32px] font-bold uppercase leading-[75%] text-black min-[992px]:text-[48px]"
-            style={{ fontFamily: "var(--font-poppins)" }}
-          >
+          <h2 className="pb-[90px] text-center text-[32px] font-bold uppercase leading-[75%] text-black min-[992px]:text-[48px]">
             {sectionTitle}
           </h2>
         </ScrollReveal>
@@ -116,7 +98,7 @@ export function AboutSection({ settings }: { settings: SiteSettings }) {
               width={2000}
               height={1500}
               sizes="390px"
-              unoptimized={portrait.includes("/storage/") || portrait.includes("r2.dev")}
+              unoptimized={shouldUnoptimize(portrait)}
               className="relative z-[1] w-full rounded-[20px] shadow-[0_25px_50px_-25px_#000]"
             />
           </ScrollReveal>

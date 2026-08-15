@@ -79,15 +79,3 @@ export async function fetchSiteData(): Promise<SiteData | null> {
     return null;
   }
 }
-
-export function formatPrice(
-  price: string | number | null | undefined,
-  opts?: { from?: boolean; prefix?: string | null; currency?: string }
-) {
-  if (price === null || price === undefined || price === "") return "";
-  const value = Number(price).toFixed(2);
-  const currency = opts?.currency ?? "CHF";
-  const from = opts?.from ? "ab " : "";
-  const prefix = opts?.prefix ? `${opts.prefix} ` : "";
-  return `${prefix}${from}${currency} ${value}`;
-}

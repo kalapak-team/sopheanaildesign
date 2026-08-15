@@ -104,10 +104,8 @@ class StatsController extends Controller
                 ['label' => 'Read', 'value' => $read, 'color' => '#151515'],
             ],
             'content_mix' => [
-                ['label' => 'Services', 'value' => $services],
                 ['label' => 'Promos', 'value' => $promotions],
                 ['label' => 'Slides', 'value' => $heroSlides],
-                ['label' => 'Gallery', 'value' => $gallery],
             ],
             'recent_messages' => $recent,
         ];

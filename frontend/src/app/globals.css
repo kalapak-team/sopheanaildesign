@@ -20,6 +20,16 @@
   --font-display: var(--font-playfair);
 }
 
+@layer utilities {
+  .font-poppins {
+    font-family: var(--font-poppins), Poppins, sans-serif;
+  }
+
+  .font-open-sans {
+    font-family: var(--font-open-sans), "Open Sans", sans-serif;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -189,6 +199,7 @@ body {
 /* —— Admin Light / Dark theme —— */
 .admin-app {
   color-scheme: light;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   --admin-page-bg: #f7f5f6;
   --admin-chart-grid: #ececec;
   --admin-chart-label: #525252;

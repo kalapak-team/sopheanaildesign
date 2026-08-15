@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
-use App\Models\GalleryImage;
 use App\Models\HeroSlide;
 use App\Models\OpeningHour;
 use App\Models\Promotion;
-use App\Models\ServiceCategory;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -53,13 +51,6 @@ class AdminBootstrapController extends Controller
                     ->get(['id', 'name', 'email', 'phone', 'message', 'is_read', 'created_at'])
                     ->toArray(),
             ],
-            'categories' => [
-                'categories' => ServiceCategory::query()
-                    ->with(['services' => fn ($q) => $q->orderBy('sort_order')])
-                    ->orderBy('sort_order')
-                    ->get()
-                    ->toArray(),
-            ],
             'promotions' => [
                 'promotions' => Promotion::query()->orderBy('sort_order')->get()->toArray(),
             ],
@@ -71,9 +62,6 @@ class AdminBootstrapController extends Controller
             ],
             'hero_slides' => [
                 'hero_slides' => HeroSlide::query()->orderBy('sort_order')->get()->toArray(),
-            ],
-            'gallery' => [
-                'gallery' => GalleryImage::query()->orderBy('sort_order')->get()->toArray(),
             ],
             default => ['message' => 'Unknown only='.$only],
         };
@@ -90,16 +78,10 @@ class AdminBootstrapController extends Controller
                 ->limit(50)
                 ->get(['id', 'name', 'email', 'phone', 'message', 'is_read', 'created_at'])
                 ->toArray(),
-            'categories' => ServiceCategory::query()
-                ->with(['services' => fn ($q) => $q->orderBy('sort_order')])
-                ->orderBy('sort_order')
-                ->get()
-                ->toArray(),
             'promotions' => Promotion::query()->orderBy('sort_order')->get()->toArray(),
             'opening_hours' => OpeningHour::query()->orderBy('sort_order')->get()->toArray(),
             'settings' => SiteSetting::query()->pluck('value', 'key')->all(),
             'hero_slides' => HeroSlide::query()->orderBy('sort_order')->get()->toArray(),
-            'gallery' => GalleryImage::query()->orderBy('sort_order')->get()->toArray(),
         ];
     }
 

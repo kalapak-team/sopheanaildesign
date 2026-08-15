@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { User, FileText, LogOut, ChevronDown } from "lucide-react";
 import { mediaUrl } from "./media";
-import { poppins } from "./types";
 
 export type AdminUser = {
   id: number;
@@ -43,7 +42,7 @@ export function ProfileMenu({ user, onProfile, onInhalte, onLogout }: Props) {
   const avatarSrc = mediaUrl(user?.avatar);
 
   return (
-    <div className="relative" ref={rootRef} style={poppins}>
+    <div className="relative" ref={rootRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

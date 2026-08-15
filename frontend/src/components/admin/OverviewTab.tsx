@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Tag,
   LayoutDashboard,
   Percent,
   Mail,
@@ -11,14 +10,11 @@ import {
 import { Card, SectionHeader, Spinner } from "./ui";
 import { BarChart, DonutChart, ContentMixBars } from "./charts";
 import type { StatsData } from "./types";
-import { poppins } from "./types";
 
 export function OverviewTab({
   stats,
-  onGoMessages,
 }: {
   stats: StatsData | null;
-  onGoMessages: () => void;
 }) {
   if (!stats?.totals) {
     return (
@@ -49,13 +45,6 @@ export function OverviewTab({
       tone: "text-brand-pink bg-brand-pink/10",
     },
     {
-      label: "Services",
-      value: stats.totals.services ?? 0,
-      sub: `${stats.totals.categories ?? 0} Kategorien`,
-      icon: Tag,
-      tone: "text-violet-600 bg-violet-50",
-    },
-    {
       label: "Aktionen",
       value: stats.totals.promotions ?? 0,
       sub: "Promotions",
@@ -63,22 +52,22 @@ export function OverviewTab({
       tone: "text-amber-600 bg-amber-50",
     },
     {
-      label: "Medien",
-      value: (stats.totals.hero_slides ?? 0) + (stats.totals.gallery ?? 0),
-      sub: `${stats.totals.hero_slides ?? 0} Slides · ${stats.totals.gallery ?? 0} Galerie`,
+      label: "Hero Slides",
+      value: stats.totals.hero_slides ?? 0,
+      sub: "Startseiten-Carousel",
       icon: Images,
       tone: "text-sky-600 bg-sky-50",
     },
   ];
 
   return (
-    <div style={poppins}>
+    <div>
       <SectionHeader
         title="Overview"
         description="Kennzahlen, Trends und aktuelle Nachrichten auf einen Blick."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
@@ -138,13 +127,6 @@ export function OverviewTab({
             <h3 className="text-sm font-semibold text-neutral-900">
               Letzte Nachrichten
             </h3>
-            <button
-              type="button"
-              onClick={onGoMessages}
-              className="text-xs font-semibold text-brand-pink hover:underline"
-            >
-              Alle anzeigen
-            </button>
           </div>
           {recentMessages.length === 0 ? (
             <p className="px-5 py-10 text-center text-sm text-neutral-400">

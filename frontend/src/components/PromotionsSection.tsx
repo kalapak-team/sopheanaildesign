@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { Promotion } from "@/lib/api";
-import { mediaUrl } from "@/lib/media";
+import { mediaUrl, shouldUnoptimize } from "@/lib/media";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
 type Props = {
@@ -69,7 +69,6 @@ export function PromotionsSection({
     <section
       id="Aktionen"
       className="flex flex-col items-center overflow-x-clip bg-white px-[10px] pb-[90px] pt-[140px] min-[480px]:px-[12.5px] min-[992px]:px-0 min-[992px]:pb-[100px] min-[992px]:pt-[160px]"
-      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
     >
       <ScrollReveal direction="pop">
         <h3 className="mb-[90px] px-2 text-center text-[32px] font-bold uppercase leading-[1.35] text-black min-[480px]:text-[36px] min-[992px]:mb-[100px] min-[992px]:text-[48px] min-[992px]:leading-[1.1]">
@@ -117,9 +116,7 @@ export function PromotionsSection({
                     width={266}
                     height={266}
                     className="h-auto w-[266px] max-w-[85%]"
-                    unoptimized={
-                      src.includes("/storage/") || src.includes("r2.dev")
-                    }
+                    unoptimized={shouldUnoptimize(src)}
                   />
                 ) : null}
               </div>

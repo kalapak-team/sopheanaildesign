@@ -2,7 +2,6 @@
 
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import type { ToastState } from "./types";
-import { poppins } from "./types";
 
 export function Card({
   children,
@@ -14,7 +13,6 @@ export function Card({
   return (
     <div
       className={`rounded-xl border border-neutral-200/80 bg-white shadow-sm shadow-neutral-200/40 ${className}`}
-      style={poppins}
     >
       {children}
     </div>
@@ -31,7 +29,7 @@ export function SectionHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-start justify-between gap-3" style={poppins}>
+    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
         {description && <p className="mt-0.5 text-sm text-neutral-500">{description}</p>}
@@ -51,7 +49,7 @@ export function Field({
   className?: string;
 }) {
   return (
-    <label className={`block ${className}`} style={poppins}>
+    <label className={`block ${className}`}>
       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
         {label}
       </span>
@@ -95,7 +93,6 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={`inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition disabled:opacity-50 ${styles} ${className}`}
-      style={poppins}
     >
       {children}
     </button>
@@ -118,7 +115,6 @@ export function Toggle({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className="inline-flex items-center gap-2"
-      style={poppins}
     >
       <span
         className={`relative h-5 w-9 rounded-full transition ${
@@ -143,7 +139,6 @@ export function Toast({ toast }: { toast: ToastState }) {
       className={`fixed bottom-6 right-6 z-[100] flex max-w-sm items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium shadow-xl animate-[fade-up_0.3s_ease] ${
         toast.type === "success" ? "bg-[#151515] text-white" : "bg-red-600 text-white"
       }`}
-      style={poppins}
     >
       {toast.type === "success" ? (
         <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-pink" />

@@ -1,11 +1,7 @@
 import Image from "next/image";
 import type { SiteSettings } from "@/lib/api";
-import { settingImage } from "@/lib/media";
+import { settingImage, shouldUnoptimize } from "@/lib/media";
 
-/**
- * `.preisliste-sec`: dark nail-polish photo band with a centered pink brush
- * divider above the baked-in price-list graphic.
- */
 export function PreislisteSection({ settings }: { settings?: SiteSettings }) {
   const bg = settingImage(
     settings,
@@ -48,7 +44,7 @@ export function PreislisteSection({ settings }: { settings?: SiteSettings }) {
           sizes="100vw"
           className="h-auto w-full"
           priority={false}
-          unoptimized={list.includes("/storage/")}
+          unoptimized={shouldUnoptimize(list)}
         />
       </div>
     </section>

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import { poppins } from "./types";
 import { Btn, Spinner } from "./ui";
 
 type ModalProps = {
@@ -41,7 +40,7 @@ export function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" style={poppins}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6">
       <button
         type="button"
         aria-label="Close"

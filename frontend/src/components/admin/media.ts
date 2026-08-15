@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/api";
 export { mediaUrl } from "@/lib/media";
 
-/** Client-side guard (must stay under PHP/Laravel limits) */
+// keep under laravel's upload limit
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export async function uploadImage(

@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { Camera, ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { mediaUrl, uploadImage } from "./media";
 import { inputClass } from "./ui";
-import { poppins } from "./types";
 
 type Props = {
   token: string;
@@ -12,9 +11,7 @@ type Props = {
   onChange: (path: string) => void;
   folder?: string;
   label?: string;
-  /** circular avatar picker */
   variant?: "default" | "avatar";
-  /** show raw URL/path field (off by default for a cleaner UI) */
   showPath?: boolean;
   onUnauthorized?: () => void;
   onError?: (message: string) => void;
@@ -65,7 +62,7 @@ export function ImageUpload({
 
   if (variant === "avatar") {
     return (
-      <div className="flex flex-col items-center gap-3" style={poppins}>
+      <div className="flex flex-col items-center gap-3">
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
@@ -115,7 +112,7 @@ export function ImageUpload({
   }
 
   return (
-    <div className="space-y-2" style={poppins}>
+    <div className="space-y-2">
       <div className="flex flex-wrap items-start gap-3">
         <button
           type="button"

@@ -4,10 +4,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type Direction = "left" | "right" | "up" | "pop";
 
-/**
- * Scroll reveal — slides/fades in when the element enters the viewport.
- * Also called: scroll-triggered animation / entrance animation.
- */
 export function ScrollReveal({
   children,
   direction = "up",
@@ -26,6 +22,7 @@ export function ScrollReveal({
     const el = ref.current;
     if (!el) return;
 
+    // respect OS "reduce motion" — just show the content
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       setVisible(true);
@@ -36,7 +33,7 @@ export function ScrollReveal({
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          io.unobserve(el);
+          io.unobserve(el); // fire once
         }
       },
       { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }

@@ -1,7 +1,5 @@
 "use client";
 
-import { poppins } from "./types";
-
 export function BarChart({
   data,
 }: {
@@ -19,7 +17,7 @@ export function BarChart({
     rows.length > 0 ? (innerW - gap * (rows.length - 1)) / rows.length : innerW;
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full" style={poppins}>
+    <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full">
       {[0, 0.5, 1].map((t) => {
         const y = pad.top + innerH * (1 - t);
         return (
@@ -143,7 +141,7 @@ export function DonutChart({
           y={cy - 4}
           textAnchor="middle"
           className="fill-neutral-900"
-          style={{ fontSize: 22, fontWeight: 700, ...poppins }}
+          style={{ fontSize: 22, fontWeight: 700 }}
         >
           {rows.reduce((s, x) => s + x.value, 0)}
         </text>
@@ -152,12 +150,12 @@ export function DonutChart({
           y={cy + 14}
           textAnchor="middle"
           className="fill-neutral-400"
-          style={{ fontSize: 10, ...poppins }}
+          style={{ fontSize: 10 }}
         >
           Nachrichten
         </text>
       </svg>
-      <div className="space-y-2" style={poppins}>
+      <div className="space-y-2">
         {rows.map((seg) => (
           <div key={seg.label} className="flex items-center gap-2 text-sm">
             <span
@@ -181,7 +179,7 @@ export function ContentMixBars({
   const rows = Array.isArray(data) ? data : [];
   const max = Math.max(...rows.map((d) => d.value), 1);
   return (
-    <div className="space-y-3" style={poppins}>
+    <div className="space-y-3">
       {rows.map((d) => (
         <div key={d.label}>
           <div className="mb-1 flex justify-between text-xs">

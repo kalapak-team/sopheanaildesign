@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import {
   Save,
   Shield,
-  Mail,
   UserRound,
   Settings,
   ExternalLink,
   Images,
-  Tag,
   Percent,
   Clock,
 } from "lucide-react";
@@ -102,20 +100,6 @@ export function ProfileTab({
 
   const quickStats = [
     {
-      label: "Nachrichten",
-      value: stats?.totals.unread_messages ?? "—",
-      hint: "ungelesen",
-      icon: Mail,
-      tab: "messages" as TabId,
-    },
-    {
-      label: "Services",
-      value: stats?.totals.services ?? "—",
-      hint: "Preise",
-      icon: Tag,
-      tab: "services" as TabId,
-    },
-    {
       label: "Aktionen",
       value: stats?.totals.promotions ?? "—",
       hint: "aktiv",
@@ -123,14 +107,11 @@ export function ProfileTab({
       tab: "promotions" as TabId,
     },
     {
-      label: "Medien",
-      value:
-        stats != null
-          ? stats.totals.hero_slides + stats.totals.gallery
-          : "—",
-      hint: "Slides + Galerie",
+      label: "Hero Slides",
+      value: stats?.totals.hero_slides ?? "—",
+      hint: "Carousel",
       icon: Images,
-      tab: "gallery" as TabId,
+      tab: "hero" as TabId,
     },
   ];
 
@@ -382,7 +363,7 @@ export function ProfileTab({
               <a
                 href="/"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex w-full items-center gap-3 rounded-xl border border-neutral-100 px-3 py-2.5 text-left transition hover:border-brand-pink/25 hover:bg-brand-pink/5"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">

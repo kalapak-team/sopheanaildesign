@@ -2,7 +2,6 @@
 
 import type { AdminTheme } from "./theme";
 
-/** Crisp sun / moon glyphs (not emoji) for a clean admin chrome */
 function SunIcon({ className }: { className?: string }) {
   return (
     <svg

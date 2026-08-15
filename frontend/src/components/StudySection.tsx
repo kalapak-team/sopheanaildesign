@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { SiteSettings } from "@/lib/api";
-import { settingImage } from "@/lib/media";
+import { settingImage, shouldUnoptimize } from "@/lib/media";
 import {
   RichPlainText,
   studyBenefitsFromSettings,
@@ -47,11 +47,9 @@ export function StudySection({ settings }: { settings: SiteSettings }) {
 
   return (
     <section
-      className="relative py-[80px] text-white"
+      className="relative bg-[#1d1d1d] py-[80px] text-white"
       style={{
-        backgroundColor: "#1d1d1d",
         backgroundImage: "linear-gradient(#141414, transparent 10%)",
-        fontFamily: "var(--font-poppins), Poppins, sans-serif",
       }}
     >
       <div className="mx-auto w-[90%] max-w-[1280px]">
@@ -95,9 +93,7 @@ export function StudySection({ settings }: { settings: SiteSettings }) {
               fill
               className="object-cover"
               sizes="(max-width:768px) 100vw, 33vw"
-              unoptimized={
-                studyImage.includes("/storage/") || studyImage.includes("r2.dev")
-              }
+              unoptimized={shouldUnoptimize(studyImage)}
             />
           </div>
         </div>

@@ -4,13 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { HeroSlide } from "@/lib/api";
-import { mediaUrl } from "@/lib/media";
+import { mediaUrl, shouldUnoptimize } from "@/lib/media";
 
-/**
- * Desktop: arrows sit outside left/right of the image (Webflow layout).
- * Mobile: image first, then arrows below, then pagination dots
- * (matches sopheanaildesign.webflow.io mobile).
- */
 export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
   const total = slides.length || 1;
@@ -32,7 +27,6 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   return (
     <section className="flex flex-col items-center bg-[#030203] pb-[40px]">
       <div className="relative mt-[20px] flex w-screen flex-col items-center min-[992px]:h-[clamp(400px,100vh,800px)] min-[992px]:justify-center">
-        {/* Image frame */}
         <div className="relative aspect-[3/4] w-[90%] max-w-[1150px] min-[768px]:aspect-[4/5] min-[992px]:aspect-auto min-[992px]:h-[75%]">
           {slides.map((slide, i) => {
             const src = mediaUrl(slide.image_path);
@@ -50,15 +44,13 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                   priority={i === 0}
                   className="object-cover"
                   sizes="(max-width:991px) 90vw, 1150px"
-                  unoptimized={
-                    src.includes("/storage/") || src.includes("r2.dev")
-                  }
+                  unoptimized={shouldUnoptimize(src)}
                 />
               </div>
             );
           })}
 
-          {/* Desktop-only side arrows */}
+          {/* arrows sit outside the image on desktop */}
           <button
             type="button"
             onClick={prev}
@@ -77,7 +69,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           </button>
         </div>
 
-        {/* Mobile: arrows under the image, then dots */}
+        {/* phone: arrows under the image, then dots */}
         <div className="mt-3 flex w-[90%] max-w-[1150px] flex-col items-center gap-6 min-[992px]:mt-[14px] min-[992px]:gap-[6px]">
           <div className="flex w-full max-w-[320px] items-center justify-between min-[480px]:max-w-[380px] min-[992px]:hidden">
             <button

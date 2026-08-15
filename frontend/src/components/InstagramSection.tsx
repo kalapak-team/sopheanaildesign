@@ -3,13 +3,11 @@
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import type { SiteSettings } from "@/lib/api";
+import { EXTERNAL_REL } from "@/lib/site";
 
 const ELF_SIGHT_APP_ID = "6977d479-4143-42d0-bcb8-2d139541316a";
 
-/**
- * Elfsight dashboard has mobile at 1×1. Patch boot settings so mobile
- * shows 2×2 (4 images) and desktop keeps 4×2 — same style, layout only.
- */
+// elfsight dashboard ships 1x1 on mobile — we force 2x2
 function patchElfsightBootPayload(payload: unknown): unknown {
   if (!payload || typeof payload !== "object") return payload;
   const root = payload as {
@@ -40,8 +38,7 @@ function patchElfsightBootPayload(payload: unknown): unknown {
   const settings = root.data?.widgets?.[ELF_SIGHT_APP_ID]?.data?.settings;
   if (!settings) return payload;
 
-  // Manual mode required — auto mode ignores responsive breakpoints.
-  // Elfsight picks the first breakpoint where innerWidth <= minWidth.
+  // auto mode ignores breakpoints; first matching minWidth wins
   settings.columnsMode = "manual";
   settings.columns = 4;
   settings.rows = 2;
@@ -128,11 +125,6 @@ function installElfsightLayoutPatch() {
   };
 }
 
-/**
- * Instagram section — Elfsight feed (same widget id as the Webflow site),
- * with a local fallback if Elfsight is temporarily unavailable.
- * Script loads only when the section nears the viewport.
- */
 export function InstagramSection({ settings }: { settings: SiteSettings }) {
   const [showFallback, setShowFallback] = useState(false);
   const [patchReady, setPatchReady] = useState(false);
@@ -193,8 +185,7 @@ export function InstagramSection({ settings }: { settings: SiteSettings }) {
     >
       <div className="mx-auto w-[80%] max-w-[1200px]">
         <h1
-          className="mx-auto mb-16 w-[80%] max-w-[1151px] text-center text-[32px] font-bold uppercase leading-none tracking-[-1.5px] text-black min-[768px]:mb-[80px] min-[768px]:text-[64px]"
-          style={{ fontFamily: "var(--font-open-sans), 'Open Sans', sans-serif" }}
+          className="font-open-sans mx-auto mb-16 w-[80%] max-w-[1151px] text-center text-[32px] font-bold uppercase leading-none tracking-[-1.5px] text-black min-[768px]:mb-[80px] min-[768px]:text-[64px]"
         >
           {settings.social_heading}
         </h1>
@@ -210,25 +201,18 @@ export function InstagramSection({ settings }: { settings: SiteSettings }) {
 
         {showFallback && (
           <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-neutral-200 bg-white px-8 py-10 text-center shadow-sm">
-            <p
-              className="text-lg font-semibold text-black"
-              style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
-            >
+            <p className="text-lg font-semibold text-black">
               {settings.instagram_handle || "@sopheanaildesign"}
             </p>
-            <p
-              className="mt-2 text-sm text-neutral-600"
-              style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
-            >
+            <p className="mt-2 text-sm text-neutral-600">
               Instagram feed is temporarily unavailable. Follow us for the latest
               designs.
             </p>
             <a
               href={instagramUrl}
               target="_blank"
-              rel="noreferrer"
+              rel={EXTERNAL_REL}
               className="mt-6 inline-flex items-center justify-center rounded-full bg-brand-pink px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:opacity-90"
-              style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
             >
               Open Instagram
             </a>

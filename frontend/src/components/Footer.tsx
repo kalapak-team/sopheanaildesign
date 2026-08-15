@@ -1,8 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { OpeningHour, SiteSettings } from "@/lib/api";
-import { settingImage } from "@/lib/media";
-
-const poppins = { fontFamily: "var(--font-poppins), Poppins, sans-serif" } as const;
+import { cn } from "@/lib/cn";
+import { settingImage, shouldUnoptimize } from "@/lib/media";
+import { EXTERNAL_REL, mapsHref, telHref } from "@/lib/site";
 
 function FacebookIcon() {
   return (
@@ -30,49 +31,43 @@ function InstagramIcon() {
 const linkClass =
   "flex items-center justify-center gap-2 py-2 text-sm font-semibold text-[#ffffffb3] transition-colors duration-300 hover:text-[#ececec] min-[992px]:justify-start";
 
-/**
- * Footer — matched to sopheanaildesign.webflow.io `.nail-footer`
- * Mobile: centered stack (logo → phone → hours → standort/nav → social → legal)
- * Desktop: logo/phone left, three columns right
- */
-export function Footer({
-  settings,
-  openingHours,
-}: {
+type FooterProps = {
   settings: SiteSettings;
   openingHours: OpeningHour[];
-}) {
+};
+
+export function Footer({ settings, openingHours }: FooterProps) {
   const footerLogo = settingImage(
     settings,
     "logo_footer_image",
     "/images/brand/logo-footer.png"
   );
   const phone = settings.phone_intl || settings.phone;
+  const mapsUrl = mapsHref(settings.address_line1, settings.address_line2);
+  const impressumUrl = settings.impressum_url || "#impressum";
 
   return (
     <footer
       id="kontakt"
       className="relative border-t border-[#303030] bg-[#161616] text-white"
-      style={poppins}
     >
       <div className="mx-auto w-[90%] max-w-[1280px] py-12 min-[768px]:py-16 min-[992px]:py-20">
         <div className="grid grid-cols-1 gap-y-12 min-[768px]:gap-y-12 min-[992px]:grid-cols-[0.75fr_auto] min-[992px]:items-start min-[992px]:gap-x-[8vw]">
-          {/* Logo + phone — phone always centered under logo */}
           <div className="flex flex-col items-center min-[992px]:max-w-[32rem] min-[992px]:items-start">
             <div className="flex w-[340px] max-w-full flex-col items-center min-[480px]:w-[400px] min-[992px]:w-[520px]">
-              <a href="#home" className="mb-6 block w-full min-[992px]:mb-8">
+              <Link href="#home" className="mb-6 block w-full min-[992px]:mb-8">
                 <Image
                   src={footerLogo}
                   alt="Sophea Naildesign"
                   width={632}
                   height={256}
                   sizes="(max-width: 991px) 400px, 520px"
-                  unoptimized
+                  unoptimized={shouldUnoptimize(footerLogo)}
                   className="h-auto w-full"
                 />
-              </a>
+              </Link>
               <a
-                href={`tel:${phone.replace(/\s/g, "")}`}
+                href={telHref(phone)}
                 className="mt-2 block w-full whitespace-nowrap text-center text-[30px] font-bold leading-[1.2] text-[#fffdfd] min-[480px]:text-[35px] min-[992px]:mt-5 min-[992px]:pb-24 min-[992px]:text-[40px]"
               >
                 {phone}
@@ -80,9 +75,7 @@ export function Footer({
             </div>
           </div>
 
-          {/* Hours | Standort+nav | Social */}
           <div className="grid grid-cols-1 gap-y-10 min-[480px]:grid-cols-[1fr_1fr_0.25fr] min-[480px]:gap-x-6 min-[480px]:gap-y-10 min-[992px]:gap-x-8">
-            {/* Öffnungszeiten */}
             <div className="flex flex-col items-center text-center min-[480px]:items-start min-[480px]:text-left">
               <div className="mb-4 text-sm font-semibold text-[#ececec]">
                 Öffnungszeiten
@@ -99,35 +92,40 @@ export function Footer({
               </div>
             </div>
 
-            {/* Standort + nav */}
             <div className="flex flex-col items-center text-center min-[480px]:items-start min-[480px]:text-left">
               <div className="mb-4 text-sm font-semibold text-[#ececec]">
                 Standort
               </div>
-              <a href="#" className={linkClass}>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel={EXTERNAL_REL}
+                className={linkClass}
+              >
                 {settings.address_line1}
               </a>
-              <a href="#" className={linkClass}>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel={EXTERNAL_REL}
+                className={linkClass}
+              >
                 {settings.address_line2}
               </a>
-              <a href="#home" className={`${linkClass} uppercase`}>
+              <Link href="#home" className={cn(linkClass, "uppercase")}>
                 HOME
-              </a>
-              <a
-                href="#dienstleistungen"
-                className={`${linkClass} uppercase`}
-              >
+              </Link>
+              <Link href="#dienstleistungen" className={cn(linkClass, "uppercase")}>
                 DIENSTLEISTUNGEN
                 <span className="inline-flex items-center rounded-full border border-[#4b4b4b] bg-[#111] px-2.5 py-0.5 text-[10px] font-normal uppercase tracking-[0.05em] text-white opacity-[0.66]">
                   New
                 </span>
-              </a>
-              <a href="#preise" className={`${linkClass} uppercase`}>
+              </Link>
+              <Link href="#preise" className={cn(linkClass, "uppercase")}>
                 PREISE
-              </a>
+              </Link>
             </div>
 
-            {/* Social */}
             <div className="flex flex-col items-center text-center min-[480px]:items-start min-[480px]:text-left">
               <div className="mb-4 text-sm font-semibold text-[#ececec]">
                 Social
@@ -135,7 +133,7 @@ export function Footer({
               <a
                 href={settings.facebook || "#"}
                 target="_blank"
-                rel="noreferrer"
+                rel={EXTERNAL_REL}
                 className="flex items-center justify-center py-2 text-[#ffffffb3] transition-colors duration-300 hover:text-[#ececec] min-[480px]:justify-start"
                 aria-label="Facebook"
               >
@@ -146,7 +144,7 @@ export function Footer({
               <a
                 href={settings.instagram || "#"}
                 target="_blank"
-                rel="noreferrer"
+                rel={EXTERNAL_REL}
                 className="flex items-center justify-center py-2 text-[#ffffffb3] transition-colors duration-300 hover:text-[#ececec] min-[480px]:justify-start"
                 aria-label="Instagram"
               >
@@ -158,9 +156,9 @@ export function Footer({
           </div>
         </div>
 
-        {/* Bottom legal — column-reverse on mobile matches Webflow visual order */}
         <div className="mt-12 flex flex-col-reverse items-center gap-3 border-t border-[#222] pt-8 text-center text-[14px] min-[768px]:mt-16 min-[992px]:mt-16 min-[992px]:flex-row min-[992px]:items-center min-[992px]:justify-between min-[992px]:gap-4 min-[992px]:text-left">
           <p className="text-[#ffffffb3]">
+            {/* brand name in the copyright line goes to Instagram */}
             {(settings.copyright || "© 2023 Sophea Naildesign. All rights reserved.")
               .split(/(Sophea Naildesign)/i)
               .map((part, i) =>
@@ -169,7 +167,7 @@ export function Footer({
                     key={i}
                     href={settings.instagram || "#"}
                     target="_blank"
-                    rel="noreferrer"
+                    rel={EXTERNAL_REL}
                     className="text-white underline underline-offset-2 transition hover:text-white/80"
                   >
                     {part}
@@ -184,7 +182,7 @@ export function Footer({
             <a
               href="https://www.orbitsystem.ch/"
               target="_blank"
-              rel="noreferrer"
+              rel={EXTERNAL_REL}
               className="underline underline-offset-2 transition hover:text-white/80"
             >
               Orbitsystem
@@ -195,18 +193,18 @@ export function Footer({
             <a
               href="https://www.orbitsystem.ch/"
               target="_blank"
-              rel="noreferrer"
+              rel={EXTERNAL_REL}
               className="underline underline-offset-2 transition hover:text-white/80"
             >
               Prom Chan
             </a>
           </p>
-          <a
-            href="#"
+          <Link
+            href={impressumUrl}
             className="uppercase tracking-wide text-[#ffffffb3] transition hover:text-[#ececec]"
           >
             IMPRESSUM &amp; DATENSCHUTZ
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

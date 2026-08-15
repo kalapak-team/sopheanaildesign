@@ -1,12 +1,9 @@
 export type TabId =
   | "overview"
   | "hero"
-  | "services"
   | "promotions"
-  | "gallery"
   | "hours"
   | "content"
-  | "messages"
   | "profile";
 
 export type ToastState = { type: "success" | "error"; message: string } | null;
@@ -37,28 +34,6 @@ export type StatsData = {
   }[];
 };
 
-export type ServiceItem = {
-  id: number;
-  service_category_id?: number;
-  name: string;
-  price: string | number | null;
-  is_from_price: boolean;
-  price_prefix?: string | null;
-  description?: string | null;
-  sort_order: number;
-  is_active?: boolean;
-};
-
-export type ServiceCategory = {
-  id: number;
-  name: string;
-  subtitle?: string | null;
-  slug: string;
-  sort_order: number;
-  is_active?: boolean;
-  services: ServiceItem[];
-};
-
 export type Promotion = {
   id: number;
   title: string;
@@ -82,15 +57,6 @@ export type HeroSlide = {
   is_active?: boolean;
 };
 
-export type GalleryImage = {
-  id: number;
-  title?: string | null;
-  image_path: string;
-  alt_text?: string | null;
-  sort_order: number;
-  is_active?: boolean;
-};
-
 export type OpeningHour = {
   id: number;
   day_label: string;
@@ -110,7 +76,3 @@ export type ContactMessage = {
 };
 
 export type SiteSettings = Record<string, string>;
-
-export const poppins = {
-  fontFamily: "var(--font-poppins), Poppins, sans-serif",
-} as const;

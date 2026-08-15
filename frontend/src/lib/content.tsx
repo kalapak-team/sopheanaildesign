@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
+import { EXTERNAL_REL } from "@/lib/site";
 
-/** First word normal, remaining words pink (e.g. "ÜBER MICH", "WARUM SOPHEA NAILDESIGN"). */
+// first word stays black, the rest goes pink
 export function TitleWithAccent({
   text,
   className = "text-brand-pink",
@@ -20,7 +21,7 @@ export function TitleWithAccent({
   );
 }
 
-/** Renders `**pink bold**` markers and optional link on the word "Studie". */
+// **this** becomes pink bold; optional link on "Studie"
 export function RichPlainText({
   text,
   linkUrl,
@@ -48,7 +49,7 @@ export function RichPlainText({
           key={`l-${i}-${j}`}
           href={linkUrl}
           target="_blank"
-          rel="noreferrer"
+          rel={EXTERNAL_REL}
           className="text-brand-pink underline"
         >
           {linkLabel}

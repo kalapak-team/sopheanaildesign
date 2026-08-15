@@ -27,9 +27,8 @@ export default async function HomePage() {
     : fallbackSiteData.promotions;
 
   return (
-    <main>
+    <main className="font-poppins">
       <FixedNav logoSrc={settingImage(settings, "logo_full_image", "/images/brand/logo-full.png")} />
-      {/* Match https://sopheanaildesign.webflow.io/ section order */}
       <DarkHero
         tagline={settings.hero_tagline}
         phone={settings.phone}
@@ -38,13 +37,7 @@ export default async function HomePage() {
         settings={settings}
       />
       <HeroCarousel slides={heroSlides} />
-      {/*
-        NOTE: the source site's "Sommer-Aktion" promo card (.preisliste-sec.aktion-1)
-        currently has `display: none` in its own production CSS (an old/seasonal
-        promo left disabled), so it is intentionally omitted here to match the
-        live site 1:1. The always-visible `.preisliste-sec` (price list) comes
-        directly after the slider, before the About section.
-      */}
+      {/* live site hides the old sommer promo, so we skip it too */}
       <PreislisteSection settings={settings} />
       <AboutSection settings={settings} />
       <StudySection settings={settings} />

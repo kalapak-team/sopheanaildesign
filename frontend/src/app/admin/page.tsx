@@ -5,11 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  Images,
-  Tag,
   Percent,
   Clock,
-  Mail,
   FileText,
   ExternalLink,
   LogOut,
@@ -22,12 +19,9 @@ import { adminFetch } from "@/components/admin/api";
 import { Toast, Spinner } from "@/components/admin/ui";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { HeroSlidesTab } from "@/components/admin/HeroSlidesTab";
-import { PreiseTab } from "@/components/admin/PreiseTab";
 import { PromotionsTab } from "@/components/admin/PromotionsTab";
-import { GalleryTab } from "@/components/admin/GalleryTab";
 import { HoursTab } from "@/components/admin/HoursTab";
 import { ContentTab } from "@/components/admin/ContentTab";
-import { MessagesTab } from "@/components/admin/MessagesTab";
 import { ProfileTab } from "@/components/admin/ProfileTab";
 import { ProfileMenu, type AdminUser } from "@/components/admin/ProfileMenu";
 import { ThemeToggle } from "@/components/admin/ThemeToggle";
@@ -36,15 +30,11 @@ import type {
   TabId,
   ToastState,
   StatsData,
-  ServiceCategory,
   Promotion,
   HeroSlide,
-  GalleryImage,
   OpeningHour,
-  ContactMessage,
   SiteSettings,
 } from "@/components/admin/types";
-import { poppins } from "@/components/admin/types";
 import {
   clearCachedStats,
   readCachedStats,
@@ -54,12 +44,9 @@ import {
 const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "hero", label: "Hero Slides", icon: GalleryHorizontal },
-  { id: "services", label: "Preise", icon: Tag },
   { id: "promotions", label: "Aktionen", icon: Percent },
-  { id: "gallery", label: "Galerie", icon: Images },
   { id: "hours", label: "Öffnungszeiten", icon: Clock },
   { id: "content", label: "Inhalte", icon: FileText },
-  { id: "messages", label: "Nachrichten", icon: Mail },
 ];
 
 const EXTRA_TITLES: Partial<Record<TabId, string>> = {
@@ -68,7 +55,7 @@ const EXTRA_TITLES: Partial<Record<TabId, string>> = {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  // Keep SSR + first client paint identical — hydrate from localStorage only after mount
+  // wait for mount so SSR and the first paint match (token lives in localStorage)
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<AdminUser | null>(null);
   const [tab, setTab] = useState<TabId>("overview");
@@ -83,12 +70,9 @@ export default function AdminDashboardPage() {
   const loadedTabsRef = useRef<Partial<Record<TabId, boolean>>>({});
 
   const [stats, setStats] = useState<StatsData | null>(null);
-  const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
-  const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [hours, setHours] = useState<OpeningHour[]>([]);
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({});
   const { theme, toggleTheme } = useAdminTheme();
 
@@ -156,12 +140,6 @@ export default function AdminDashboardPage() {
     (data: Record<string, unknown>) => {
       const bootStats = normalizeStats(data.stats);
       if (bootStats) setStats(bootStats);
-      if (Array.isArray(data.messages)) {
-        setMessages(data.messages as ContactMessage[]);
-      }
-      if (Array.isArray(data.categories)) {
-        setCategories(data.categories as ServiceCategory[]);
-      }
       if (Array.isArray(data.promotions)) {
         setPromotions(data.promotions as Promotion[]);
       }
@@ -173,9 +151,6 @@ export default function AdminDashboardPage() {
       }
       if (Array.isArray(data.hero_slides)) {
         setHeroSlides(data.hero_slides as HeroSlide[]);
-      }
-      if (Array.isArray(data.gallery)) {
-        setGallery(data.gallery as GalleryImage[]);
       }
       if (data.user && typeof data.user === "object") {
         setUser(data.user as AdminUser);
@@ -191,18 +166,12 @@ export default function AdminDashboardPage() {
         return "stats";
       case "hero":
         return "hero_slides";
-      case "services":
-        return "categories";
       case "promotions":
         return "promotions";
-      case "gallery":
-        return "gallery";
       case "hours":
         return "opening_hours";
       case "content":
         return "settings";
-      case "messages":
-        return "messages";
       case "profile":
         return null;
       default:
@@ -210,7 +179,7 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  /** Stale-while-revalidate: show cached Overview instantly, refresh in background */
+  // show cached overview first, then refresh in the background
   const loadOverview = useCallback(
     async (opts?: { force?: boolean }) => {
       if (!token) return;
@@ -251,7 +220,7 @@ export default function AdminDashboardPage() {
     [token, handleUnauthorized, normalizeStats]
   );
 
-  /** Lazy-load one tab's data when opened */
+  // fetch a tab the first time it's opened
   const loadTab = useCallback(
     async (id: TabId, opts?: { force?: boolean }) => {
       if (!token) return;
@@ -321,7 +290,6 @@ export default function AdminDashboardPage() {
         className={`admin-app flex min-h-screen items-center justify-center ${
           theme === "dark" ? "dark" : ""
         }`}
-        style={poppins}
       >
         <Spinner className="h-6 w-6" />
       </div>
@@ -331,9 +299,6 @@ export default function AdminDashboardPage() {
   const currentTabMeta = TABS.find((t) => t.id === tab);
   const headerTitle =
     currentTabMeta?.label || EXTRA_TITLES[tab] || "Admin";
-  const unreadCount =
-    stats?.totals?.unread_messages ??
-    messages.filter((m) => !m.is_read).length;
 
   const tabProps = {
     token,
@@ -345,7 +310,6 @@ export default function AdminDashboardPage() {
   return (
     <div
       className={`admin-app min-h-screen ${theme === "dark" ? "dark" : ""}`}
-      style={poppins}
       data-theme={theme}
     >
       {sidebarOpen && (
@@ -386,8 +350,6 @@ export default function AdminDashboardPage() {
           {TABS.map((t) => {
             const Icon = t.icon;
             const active = tab === t.id;
-            const badge =
-              t.id === "messages" && unreadCount > 0 ? unreadCount : null;
             return (
               <button
                 key={t.id}
@@ -409,17 +371,6 @@ export default function AdminDashboardPage() {
                   strokeWidth={2}
                 />
                 <span className="flex-1 text-left">{t.label}</span>
-                {badge !== null && (
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                      active
-                        ? "bg-white/25 text-white"
-                        : "bg-brand-pink text-white"
-                    }`}
-                  >
-                    {badge}
-                  </span>
-                )}
               </button>
             );
           })}
@@ -492,18 +443,14 @@ export default function AdminDashboardPage() {
 
         <main className="px-4 py-6 sm:px-8 sm:py-8">
           {tab === "overview" && (
-            <OverviewTab stats={stats} onGoMessages={() => setTab("messages")} />
+            <OverviewTab stats={stats} />
           )}
           {tab === "hero" && (
             <HeroSlidesTab slides={heroSlides} {...tabProps} />
           )}
-          {tab === "services" && (
-            <PreiseTab categories={categories} {...tabProps} />
-          )}
           {tab === "promotions" && (
             <PromotionsTab promotions={promotions} {...tabProps} />
           )}
-          {tab === "gallery" && <GalleryTab gallery={gallery} {...tabProps} />}
           {tab === "hours" && <HoursTab hours={hours} {...tabProps} />}
           {tab === "content" && (
             <ContentTab settings={settings} {...tabProps} />
@@ -518,9 +465,6 @@ export default function AdminDashboardPage() {
               handleUnauthorized={handleUnauthorized}
               onNavigate={setTab}
             />
-          )}
-          {tab === "messages" && (
-            <MessagesTab messages={messages} {...tabProps} />
           )}
         </main>
       </div>
